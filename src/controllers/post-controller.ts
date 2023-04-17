@@ -165,7 +165,6 @@ export class PostController {
 
                 return comment;
             })
-            console.log('upgradeComments2', upgradeComments)
             res.status(200).json({
                 "pagesCount": Math.ceil(totalCount / pageSize),
                 "page": pageNumber,
@@ -173,6 +172,26 @@ export class PostController {
                 "totalCount": totalCount,
                 "items": await Promise.all(upgradeComments)
             })
+        } catch (error) {
+            if (error instanceof Error) {
+                res.sendStatus(404);
+                console.log(error.message);
+            }
+        }
+    }
+
+    static async sendLikeOrDislikeStatus(req: Request, res: Response) {
+        try {
+            const postService = new PostService();
+            const queryService = new QueryService();
+
+            const {postId} = req.params;
+            const {likeStatus} = req.body;
+            const token = req.headers.authorization?.split(' ')[1];
+            if (token) {
+                await queryService.setUpLikeOrDislikeStatus(token, postId, likeStatus, postService)
+                res.sendStatus(204);
+            }
         } catch (error) {
             if (error instanceof Error) {
                 res.sendStatus(404);

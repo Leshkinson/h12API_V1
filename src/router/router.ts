@@ -41,6 +41,7 @@ router.put('/posts/:id', basicAuthorization, postValidation, isErrorMiddleware, 
 router.delete('/posts/:id', basicAuthorization, PostController.deletePost);
 router.get('/posts/:postId/comments', PostController.getAllCommentsForThePost);
 router.post('/posts/:postId/comments', authMiddleware, commentValidation, isErrorMiddleware, PostController.createCommentThePost);
+router.put('/posts/:postId/like-status',);
 
 /**Users**/
 router.get('/users', basicAuthorization, UserController.getAllUsers);
@@ -48,7 +49,7 @@ router.post('/users', basicAuthorization, userValidation, isErrorMiddleware, Use
 router.delete('/users/:id', basicAuthorization, UserController.deleteUser);
 
 /**Comments**/
-router.put('/comments/:commentId/like-status', authMiddleware, likeStatusValidation, isErrorMiddleware, CommentController.sendLikeOrDislikeStatusForTheComment);
+router.put('/comments/:commentId/like-status', authMiddleware, likeStatusValidation, isErrorMiddleware, CommentController.sendLikeOrDislikeStatus);
 router.put('/comments/:commentId', authMiddleware, commentValidation, isErrorMiddleware, CommentController.updateComment);
 router.delete('/comments/:id', authMiddleware, CommentController.deleteComment);
 router.get('/comments/:id', CommentController.getOneComment);

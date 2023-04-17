@@ -1,14 +1,13 @@
 import mongoose, {Schema} from "mongoose";
 import {ILikeStatus} from "../ts/interfaces";
 
-export const LikeSchema = new Schema({
+export const LikeSchemaForPost = new Schema({
     likeStatus: {type: "string", required: true},
     userId: {type: "string", required: true},
-    commentId: {type: mongoose.Types.ObjectId, ref: 'Comment'},
-    //commentId: {type: "string", required: true},
+    postId: {type: mongoose.Types.ObjectId, ref: 'Post'}
 }, {timestamps: true});
 
-LikeSchema.set('toJSON', {
+LikeSchemaForPost.set('toJSON', {
     transform: function (doc, dto) {
         dto.id = dto._id;
         delete dto._id;
@@ -17,6 +16,6 @@ LikeSchema.set('toJSON', {
     }
 });
 
-LikeSchema.set('id', true);
+LikeSchemaForPost.set('id', true);
 
-export const LikeModel = mongoose.model<ILikeStatus>('LikeStatus', LikeSchema)
+export const LikeModelForPost = mongoose.model<ILikeStatus>('LikeStatusForPost', LikeSchemaForPost)

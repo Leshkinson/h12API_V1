@@ -7,6 +7,18 @@ export const PostSchema = new Schema({
     content: {type: "string", required: true},
     blogId: {type: "string", required: true},
     blogName: {type: "string", required: true},
+    extendedLikesInfo: {
+        likesCount: {type: "number", default: 0},
+        dislikesCount: {type: "number", default: 0},
+        myStatus: {type: "string", default: "None"},
+        newestLikes: [
+            {
+                addedAt: {type: Date},
+                userId: {type: "string"},
+                login: {type: "string"}
+            }
+        ]
+    }
 }, {timestamps: true});
 
 PostSchema.set('toJSON', {

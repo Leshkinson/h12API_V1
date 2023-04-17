@@ -11,6 +11,9 @@ import {UsersRepository} from "../repositories/users-repository";
 import {CommentsRepository} from "../repositories/comments-repository";
 import {IBlog, IComment, ILikeStatus, IPost, IUser} from "../ts/interfaces";
 import {LikeRepository} from "../repositories/like-repository";
+import {UserService} from "./user-service";
+import {CommentService} from "./comment-service";
+import {PostService} from "./post-service";
 
 export class QueryService {
     private blogRepository: BlogsRepository;
@@ -157,6 +160,22 @@ export class QueryService {
         const like = await this.likeRepository.findLike(userId, commentId);
         if (like)
             return like.likeStatus
+    }
+
+    public async setUpLikeOrDislikeStatus(token: string, commentOrPostId: string, likeStatus: string, service: CommentService | PostService): Promise<ILikeStatus | null> {
+        const userService = new UserService();
+        const tokenService = new TokenService();
+
+        const payload = await tokenService.getPayloadByAccessToken(token) as JWT;
+        const user = await userService.getUserById(payload.id);
+        const commentOrPost: IComment | IPost | undefined = await service.getOne(commentOrPostId);
+        if (!user || !commentOrPost) {
+            throw new Error()
+            // res.sendStatus(404);
+            //
+            // return;
+        }
+        return await this.makeLikeStatusForTheComment(likeStatus, commentOrPostId, String(user._id));
     }
 
     public async testingDelete(): Promise<void> {

@@ -131,26 +131,27 @@ export class CommentController {
         }
     }
 
-    static async sendLikeOrDislikeStatusForTheComment(req: Request, res: Response) {
+    static async sendLikeOrDislikeStatus(req: Request, res: Response) {
         try {
-            const userService = new UserService();
-            const tokenService = new TokenService();
-            const queryService = new QueryService();
+            //const userService = new UserService();
+            //const tokenService = new TokenService();
             const commentService = new CommentService();
+            const queryService = new QueryService();
 
             const {commentId} = req.params;
             const {likeStatus} = req.body;
             const token = req.headers.authorization?.split(' ')[1];
             if (token) {
-                const payload = await tokenService.getPayloadByAccessToken(token) as JWT;
-                const user = await userService.getUserById(payload.id);
-                const comment: IComment | undefined = await commentService.getOne(commentId);
-                if (!user || !comment) {
-                    res.sendStatus(404);
-
-                    return;
-                }
-                await queryService.makeLikeStatusForTheComment(likeStatus, commentId, String(user._id));
+                await queryService.setUpLikeOrDislikeStatus(token, commentId, likeStatus, commentService)
+                // const payload = await tokenService.getPayloadByAccessToken(token) as JWT;
+                // const user = await userService.getUserById(payload.id);
+                // const comment: IComment | undefined = await commentService.getOne(commentId);
+                // if (!user || !comment) {
+                //     res.sendStatus(404);
+                //
+                //     return;
+                // }
+                // await queryService.makeLikeStatusForTheComment(likeStatus, commentId, String(user._id));
                 res.sendStatus(204);
             }
         } catch (error) {
