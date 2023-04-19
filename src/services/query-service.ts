@@ -129,13 +129,13 @@ export class QueryService {
         return this.commentModel.find({postId: (post?._id)?.toString()}).count();
     }
 
-    public async makeLikeStatusForTheComment(likeStatus: string, commentId: string, userId: string): Promise<ILikeStatus | null> {
-        const like = await this.likeRepository.findLike(userId, commentId);
+    public async makeLikeStatusForTheComment(likeStatus: string, commentOrPostId: string, userId: string): Promise<ILikeStatus | null> {
+        const like = await this.likeRepository.findLike(userId, commentOrPostId);
         if (like) {
             return await this.changeLikeStatusForTheComment(String(like?._id), likeStatus);
         }
 
-        return await this.likeRepository.createLike(commentId, userId, likeStatus);
+        return await this.likeRepository.createLike(commentOrPostId, userId, likeStatus);
     }
 
     public async changeLikeStatusForTheComment(likeId: string, likeStatus: string): Promise<ILikeStatus | null> {
@@ -176,6 +176,10 @@ export class QueryService {
             // return;
         }
         return await this.makeLikeStatusForTheComment(likeStatus, commentOrPostId, String(user._id));
+    }
+
+    public async getLikes(id: string): Promise<ILikeStatus[] | null> {
+        return  await this.likeRepository.findLikes(id)
     }
 
     public async testingDelete(): Promise<void> {

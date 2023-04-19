@@ -3,9 +3,10 @@ import {ILikeStatus} from "../ts/interfaces";
 
 export const LikeSchema = new Schema({
     likeStatus: {type: "string", required: true},
-    userId: {type: "string", required: true},
-    commentId: {type: mongoose.Types.ObjectId, ref: 'Comment'},
-    //commentId: {type: "string", required: true},
+    userId: {type: mongoose.Types.ObjectId, ref: 'User'},
+    //userId: {type: "string", required: true},
+    //commentId: {type: mongoose.Types.ObjectId, ref: 'Comment'},
+    commentOrPostId: {type: "string", required: true},
 }, {timestamps: true});
 
 LikeSchema.set('toJSON', {

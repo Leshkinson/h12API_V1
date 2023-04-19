@@ -1,9 +1,9 @@
 import {Request, Response} from "express";
 import {LikesStatus} from "../const/const";
-import {IComment, IPost} from "../ts/interfaces";
 import {PostService} from "../services/post-service";
 import {UserService} from "../services/user-service";
 import {QueryService} from "../services/query-service";
+import {IComment, ILikeStatus, IPost} from "../ts/interfaces";
 import {JWT, TokenService} from "../application/token-service";
 import {CommentsRequest, LikesStatusCfgValues, PostsRequest} from "../ts/types";
 
@@ -51,12 +51,46 @@ export class PostController {
 
     static async getOnePost(req: Request, res: Response) {
         try {
+            const userService = new UserService();
+            const tokenService = new TokenService();
+            const queryService = new QueryService();
             const postService = new PostService();
 
             const {id} = req.params;
+            const token = req.headers.authorization?.split(' ')[1];
             const findPost: IPost | undefined = await postService.getOne(id);
+            if (findPost) {
+                if (token) {
+                    const payload = await tokenService.getPayloadByAccessToken(token) as JWT;
+                    const user = await userService.getUserById(payload.id);
+                    if (user) {
+                        findPost.extendedLikesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.LIKE);
+                        findPost.extendedLikesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.DISLIKE);
+                        const myStatus = await queryService.getLikeStatus(String(user._id), String(findPost._id)) as LikesStatusCfgValues;
+                        if(myStatus)
+                            findPost.extendedLikesInfo.myStatus = myStatus;
+                        const likes = await queryService.getLikes(id) as ILikeStatus[]
+                        findPost.extendedLikesInfo.newestLikes = likes.map(async (like: ILikeStatus) => {
+                            const user = await userService.getUserById(like.userId)
+                            if (user) {
+                                return {
+                                    'addedAt': like.createdAt,
+                                    'userId': like.userId,
+                                    'login': user.login,
+                                }
+                            }
+                        })
 
-            if (findPost) res.status(200).json(findPost);
+
+                        res.status(200).json(findPost);
+
+                        return;
+                    }
+                }
+                findPost.extendedLikesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.LIKE);
+                findPost.extendedLikesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.DISLIKE);
+                res.status(200).json(findPost);
+            }
         } catch (error) {
             if (error instanceof Error) {
                 res.sendStatus(404);
@@ -125,7 +159,7 @@ export class PostController {
             const queryService = new QueryService();
 
             const {postId} = req.params;
-            const token = req.headers.authorization?.split(' ')[1]
+            const token = req.headers.authorization?.split(' ')[1];
 
             let {pageNumber, pageSize, sortDirection, sortBy} = req.query as CommentsRequest;
             pageNumber = Number(pageNumber ?? 1);

@@ -25,7 +25,3 @@ UserSchema.set('toJSON', {
 UserSchema.set('id', true);
 
 export const UserModel = mongoose.model<IUser>('User', UserSchema);
-
-const user = new UserModel({
-    name: {firstname: 'lopatko', lastname: 'oleg'}
-})

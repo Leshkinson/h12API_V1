@@ -15,6 +15,7 @@ export interface IPost {
     content: string;
     blogId: string;
     blogName: string;
+    extendedLikesInfo: extendedLikesInfo
 }
 
 export interface IUser {
@@ -34,11 +35,8 @@ export interface IComment {
         userId: string,
         userLogin: string,
     }
-    likesInfo: {
-        likesCount: number,
-        dislikesCount: number,
-        myStatus: string
-    }
+    likesInfo: LikeInfo,
+
 }
 
 export interface IDevice {
@@ -58,5 +56,22 @@ export interface UserInvitation {
 export interface ILikeStatus {
     _id: mongoose.Schema.Types.ObjectId;
     likeStatus: LikesStatusCfgValues;
-    userId: string
+    userId: string,
+    createdAt: Date
+}
+
+export interface LikeInfo {
+    likesCount: number,
+    dislikesCount: number,
+    myStatus: string
+}
+
+export interface extendedLikesInfo extends LikeInfo {
+    newestLikes: [
+        {
+            addedAt: Date,
+            userId: string,
+            login: string
+        }
+    ]
 }

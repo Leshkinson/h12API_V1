@@ -13,9 +13,9 @@ export const PostSchema = new Schema({
         myStatus: {type: "string", default: "None"},
         newestLikes: [
             {
-                addedAt: {type: Date},
-                userId: {type: "string"},
-                login: {type: "string"}
+                addedAt: {type: "Date"},
+                userId: {type: "string", default: null},
+                login: {type: "string", default: null}
             }
         ]
     }
