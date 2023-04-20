@@ -3,30 +3,72 @@ import {LikesStatus} from "../const/const";
 import {PostService} from "../services/post-service";
 import {UserService} from "../services/user-service";
 import {QueryService} from "../services/query-service";
-import {IComment, ILikeStatus, IPost} from "../ts/interfaces";
+import {IComment, ILikeStatus, IPost, UpgradeLikes} from "../ts/interfaces";
 import {JWT, TokenService} from "../application/token-service";
 import {CommentsRequest, LikesStatusCfgValues, PostsRequest} from "../ts/types";
 
 export class PostController {
     static async getAllPosts(req: Request, res: Response) {
         try {
-            const postService = new PostService();
+            const userService = new UserService();
+            const tokenService = new TokenService();
             const queryService = new QueryService();
+            const postService = new PostService();
 
+            const token = req.headers.authorization?.split(' ')[1];
             let {pageNumber, pageSize, sortBy, sortDirection} = req.query as PostsRequest;
             pageNumber = Number(pageNumber ?? 1);
             pageSize = Number(pageSize ?? 10);
 
             const posts: IPost[] = await postService.getAll(pageNumber, pageSize, sortBy, sortDirection);
             const totalCount: number = await queryService.getTotalCountForPosts();
-
-            res.status(200).json({
-                "pagesCount": Math.ceil(totalCount / pageSize),
-                "page": pageNumber,
-                "pageSize": pageSize,
-                "totalCount": totalCount,
-                "items": posts
-            })
+            if (posts) {
+                if (token) {
+                    const payload = await tokenService.getPayloadByAccessToken(token) as JWT;
+                    const user = await userService.getUserById(payload.id);
+                    if (user) {
+                        const upgradePosts = posts.map(async (post: IPost): Promise<IPost> => {
+                            post.extendedLikesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(String(post._id), LikesStatus.LIKE);
+                            post.extendedLikesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(String(post._id), LikesStatus.DISLIKE);
+                            const myStatus = await queryService.getLikeStatus(String(user._id), String(post._id)) as LikesStatusCfgValues;
+                            if (myStatus)
+                                post.extendedLikesInfo.myStatus = myStatus;
+                            const likes = await queryService.getLikes(String(post._id)) as ILikeStatus[];
+                            const upgradeLikes = likes.map(async (like: ILikeStatus): Promise<UpgradeLikes | undefined> => {
+                                const user = await userService.getUserById(like.userId)
+                                if (user) {
+                                    return {
+                                        addedAt: like.createdAt,
+                                        userId: like.userId,
+                                        login: user.login,
+                                    }
+                                }
+                            })
+                            post.extendedLikesInfo.newestLikes = await Promise.all(upgradeLikes)
+                            return post
+                        })
+                        res.status(200).json({
+                            "pagesCount": Math.ceil(totalCount / pageSize),
+                            "page": pageNumber,
+                            "pageSize": pageSize,
+                            "totalCount": totalCount,
+                            "items": await Promise.all(upgradePosts)
+                        })
+                    }
+                }
+                const upgradePosts = posts.map(async (post: IPost): Promise<IPost> => {
+                    post.extendedLikesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(String(post._id), LikesStatus.LIKE);
+                    post.extendedLikesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(String(post._id), LikesStatus.DISLIKE);
+                    return post
+                })
+                res.status(200).json({
+                    "pagesCount": Math.ceil(totalCount / pageSize),
+                    "page": pageNumber,
+                    "pageSize": pageSize,
+                    "totalCount": totalCount,
+                    "items": upgradePosts
+                })
+            }
         } catch (error) {
             if (error instanceof Error) {
                 console.log(error.message);
@@ -67,20 +109,21 @@ export class PostController {
                         findPost.extendedLikesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.LIKE);
                         findPost.extendedLikesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.DISLIKE);
                         const myStatus = await queryService.getLikeStatus(String(user._id), String(findPost._id)) as LikesStatusCfgValues;
-                        if(myStatus)
+                        if (myStatus)
                             findPost.extendedLikesInfo.myStatus = myStatus;
                         const likes = await queryService.getLikes(id) as ILikeStatus[]
-                        findPost.extendedLikesInfo.newestLikes = likes.map(async (like: ILikeStatus) => {
+                        const upgradeLikes = likes.map(async (like: ILikeStatus): Promise<UpgradeLikes | undefined> => {
                             const user = await userService.getUserById(like.userId)
                             if (user) {
                                 return {
-                                    'addedAt': like.createdAt,
-                                    'userId': like.userId,
-                                    'login': user.login,
+                                    addedAt: like.createdAt,
+                                    userId: like.userId,
+                                    login: user.login,
                                 }
                             }
                         })
 
+                        findPost.extendedLikesInfo.newestLikes = await Promise.all(upgradeLikes)
 
                         res.status(200).json(findPost);
 

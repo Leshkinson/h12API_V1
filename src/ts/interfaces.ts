@@ -15,7 +15,7 @@ export interface IPost {
     content: string;
     blogId: string;
     blogName: string;
-    extendedLikesInfo: extendedLikesInfo
+    extendedLikesInfo: ExtendedLikesInfo
 }
 
 export interface IUser {
@@ -36,7 +36,6 @@ export interface IComment {
         userLogin: string,
     }
     likesInfo: LikeInfo,
-
 }
 
 export interface IDevice {
@@ -66,12 +65,12 @@ export interface LikeInfo {
     myStatus: string
 }
 
-export interface extendedLikesInfo extends LikeInfo {
-    newestLikes: [
-        {
-            addedAt: Date,
-            userId: string,
-            login: string
-        }
-    ]
+export interface ExtendedLikesInfo extends LikeInfo {
+    newestLikes: (UpgradeLikes | undefined)[]
+}
+
+export interface UpgradeLikes {
+    addedAt: Date,
+    userId: string,
+    login: string,
 }

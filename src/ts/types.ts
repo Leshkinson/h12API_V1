@@ -51,5 +51,11 @@ const LikesStatus_CFG = {
     NONE: "None"
 } as const;
 
+// export type UpgradeLikes = {
+//     addedAt: Date,
+//     userId: string,
+//     login: string,
+// }
+
 type LikesStatusCfgKeys = keyof typeof LikesStatus_CFG
 export type LikesStatusCfgValues = typeof LikesStatus_CFG[LikesStatusCfgKeys]
