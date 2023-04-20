@@ -130,6 +130,7 @@ export class PostController {
                         const upgradeLikes = likes.map(async (like: ILikeStatus): Promise<UpgradeLikes | undefined> => {
                             const user = await userService.getUserById(like.userId)
                             if (user) {
+                                console.log('like.createdAt', like.createdAt)
                                 return {
                                     addedAt: like.createdAt,
                                     userId: like.userId,
@@ -138,6 +139,7 @@ export class PostController {
                             }
                         })
                         console.log('4')
+                        console.log('upgradeLikes get one', upgradeLikes)
                         findPost.extendedLikesInfo.newestLikes = await Promise.all(upgradeLikes)
 
                         console.log('findPost', findPost)
