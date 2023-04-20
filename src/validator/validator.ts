@@ -81,12 +81,13 @@ const isConfirmedEmail: CustomValidator = async (value: string) => {
 }
 
 const isLikeStatusCheck: CustomValidator = (value: string) => {
-    if(!Object.values(LikesStatus).some((item) => item === value)) {
+    if(!Object.values(LikesStatus).some(item => item === value)) {
         throw new Error()
     }
 
     return true;
 }
+console.log('isLikeStatusCheck', isLikeStatusCheck)
 
 export const nameValidation = body('name')
     .trim()
