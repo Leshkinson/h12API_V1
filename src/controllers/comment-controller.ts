@@ -109,8 +109,8 @@ export class CommentController {
                     const payload = await tokenService.getPayloadByAccessToken(token) as JWT;
                     const user = await userService.getUserById(payload.id);
                     if (user) {
-                        findComment.likesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.LIKE);
-                        findComment.likesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.DISLIKE);
+                        findComment.likesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.LIKE, commentService);
+                        findComment.likesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.DISLIKE, commentService);
                         const myStatus = await queryService.getLikeStatus(String(user._id), String(findComment._id)) as LikesStatusCfgValues;
                         if(myStatus)
                             findComment.likesInfo.myStatus = myStatus;
@@ -119,8 +119,8 @@ export class CommentController {
                         return;
                     }
                 }
-                findComment.likesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.LIKE);
-                findComment.likesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.DISLIKE);
+                findComment.likesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.LIKE, commentService);
+                findComment.likesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.DISLIKE, commentService);
                 res.status(200).json(findComment);
             }
         } catch (error) {

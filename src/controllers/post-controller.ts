@@ -6,6 +6,7 @@ import {QueryService} from "../services/query-service";
 import {IComment, ILikeStatus, IPost, UpgradeLikes} from "../ts/interfaces";
 import {JWT, TokenService} from "../application/token-service";
 import {CommentsRequest, LikesStatusCfgValues, PostsRequest} from "../ts/types";
+import {CommentService} from "../services/comment-service";
 
 export class PostController {
     static async getAllPosts(req: Request, res: Response) {
@@ -31,8 +32,8 @@ export class PostController {
                     console.log('user p[ost', user)
                     if (user) {
                         const upgradePosts = posts.map(async (post: IPost): Promise<IPost> => {
-                            post.extendedLikesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(String(post._id), LikesStatus.LIKE);
-                            post.extendedLikesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(String(post._id), LikesStatus.DISLIKE);
+                            post.extendedLikesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(String(post._id), LikesStatus.LIKE, postService);
+                            post.extendedLikesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(String(post._id), LikesStatus.DISLIKE, postService);
                             const myStatus = await queryService.getLikeStatus(String(user._id), String(post._id)) as LikesStatusCfgValues;
                             if (myStatus)
                                 post.extendedLikesInfo.myStatus = myStatus;
@@ -61,8 +62,8 @@ export class PostController {
                     }
                 }
                 const upgradePosts = posts.map(async (post: IPost): Promise<IPost> => {
-                    post.extendedLikesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(String(post._id), LikesStatus.LIKE);
-                    post.extendedLikesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(String(post._id), LikesStatus.DISLIKE);
+                    post.extendedLikesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(String(post._id), LikesStatus.LIKE, postService);
+                    post.extendedLikesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(String(post._id), LikesStatus.DISLIKE, postService);
                     return post
                 })
                 console.log('upgradePosts post2', await Promise.all(upgradePosts))
@@ -115,11 +116,11 @@ export class PostController {
                     const user = await userService.getUserById(payload.id);
                     if (user) {
                         console.log('user', user)
-                        console.log('findPost.extendedLikesInfo.likesCount before', findPost.extendedLikesInfo.likesCount )
-                        findPost.extendedLikesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.LIKE);
-                        console.log('findPost.extendedLikesInfo.likesCount after', findPost.extendedLikesInfo.likesCount )
+                        console.log('findPost.extendedLikesInfo.likesCount before', findPost.extendedLikesInfo.likesCount)
+                        findPost.extendedLikesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.LIKE, postService);
+                        console.log('findPost.extendedLikesInfo.likesCount after', findPost.extendedLikesInfo.likesCount)
                         console.log('1')
-                        findPost.extendedLikesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.DISLIKE);
+                        findPost.extendedLikesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.DISLIKE, postService);
                         const myStatus = await queryService.getLikeStatus(String(user._id), String(findPost._id)) as LikesStatusCfgValues;
                         console.log('2')
                         if (myStatus)
@@ -145,8 +146,8 @@ export class PostController {
                         return;
                     }
                 }
-                findPost.extendedLikesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.LIKE);
-                findPost.extendedLikesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.DISLIKE);
+                findPost.extendedLikesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.LIKE, postService);
+                findPost.extendedLikesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.DISLIKE, postService);
                 res.status(200).json(findPost);
             }
         } catch (error) {
@@ -215,6 +216,7 @@ export class PostController {
             const userService = new UserService();
             const tokenService = new TokenService();
             const queryService = new QueryService();
+            const commentService = new CommentService();
 
             const {postId} = req.params;
             const token = req.headers.authorization?.split(' ')[1];
@@ -230,8 +232,8 @@ export class PostController {
                 const user = await userService.getUserById(payload.id);
                 if (user) {
                     const upgradeComments: Promise<IComment>[] = comments.map(async (comment: IComment) => {
-                        comment.likesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(String(comment._id), LikesStatus.LIKE);
-                        comment.likesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(String(comment._id), LikesStatus.DISLIKE);
+                        comment.likesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(String(comment._id), LikesStatus.LIKE, commentService);
+                        comment.likesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(String(comment._id), LikesStatus.DISLIKE, commentService);
                         const myStatus = await queryService.getLikeStatus(String(user._id), String(comment._id)) as LikesStatusCfgValues;
                         if (myStatus)
                             comment.likesInfo.myStatus = myStatus;
@@ -252,8 +254,8 @@ export class PostController {
             }
 
             const upgradeComments = comments.map(async comment => {
-                comment.likesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(String(comment._id), LikesStatus.LIKE);
-                comment.likesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(String(comment._id), LikesStatus.DISLIKE);
+                comment.likesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(String(comment._id), LikesStatus.LIKE, commentService);
+                comment.likesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(String(comment._id), LikesStatus.DISLIKE, commentService);
 
                 return comment;
             })

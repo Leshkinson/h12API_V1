@@ -103,7 +103,7 @@ export class BlogController {
             const userService = new UserService();
             const tokenService = new TokenService();
             const queryService = new QueryService();
-            //const postService = new PostService();
+            const postService = new PostService();
 
             const {blogId} = req.params;
             console.log(' blog', blogId)
@@ -123,8 +123,8 @@ export class BlogController {
                     console.log('user blog', user)
                     if (user) {
                         const upgradePosts = posts.map(async (post: IPost): Promise<IPost> => {
-                            post.extendedLikesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(String(post._id), LikesStatus.LIKE);
-                            post.extendedLikesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(String(post._id), LikesStatus.DISLIKE);
+                            post.extendedLikesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(String(post._id), LikesStatus.LIKE, postService);
+                            post.extendedLikesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(String(post._id), LikesStatus.DISLIKE, postService);
                             const myStatus = await queryService.getLikeStatus(String(user._id), String(post._id)) as LikesStatusCfgValues;
                             if (myStatus)
                                 post.extendedLikesInfo.myStatus = myStatus;
@@ -153,8 +153,8 @@ export class BlogController {
                     }
                 }
                 const upgradePosts = posts.map(async (post: IPost): Promise<IPost> => {
-                    post.extendedLikesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(String(post._id), LikesStatus.LIKE);
-                    post.extendedLikesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(String(post._id), LikesStatus.DISLIKE);
+                    post.extendedLikesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(String(post._id), LikesStatus.LIKE, postService);
+                    post.extendedLikesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(String(post._id), LikesStatus.DISLIKE, postService);
                     return post
                 })
                 console.log('upgradePosts blog2', await Promise.all(upgradePosts))

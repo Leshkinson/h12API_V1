@@ -147,10 +147,10 @@ export class QueryService {
         return like
     }
 
-    public async getTotalCountLikeOrDislike(commentId: string, param: string) {
-        const comment = await this.commentRepository.getOneComment(commentId)
-        if (comment) {
-            return await this.likeRepository.countingLikeOrDislike(String(comment._id), param)
+    public async getTotalCountLikeOrDislike(id: string, param: string, service: CommentService | PostService) {
+        const commentOrPost = await service.getOne(id)
+        if (commentOrPost) {
+            return await this.likeRepository.countingLikeOrDislike(String(commentOrPost._id), param)
         }
 
         throw new Error()
