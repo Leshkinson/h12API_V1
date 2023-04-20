@@ -104,6 +104,7 @@ export class PostController {
             const postService = new PostService();
 
             const {id} = req.params;
+            console.log('id', id)
             const token = req.headers.authorization?.split(' ')[1];
             console.log('token', token)
             const findPost: IPost | undefined = await postService.getOne(id);
@@ -114,7 +115,9 @@ export class PostController {
                     const user = await userService.getUserById(payload.id);
                     if (user) {
                         console.log('user', user)
+                        console.log('findPost.extendedLikesInfo.likesCount before', findPost.extendedLikesInfo.likesCount )
                         findPost.extendedLikesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.LIKE);
+                        console.log('findPost.extendedLikesInfo.likesCount after', findPost.extendedLikesInfo.likesCount )
                         console.log('1')
                         findPost.extendedLikesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.DISLIKE);
                         const myStatus = await queryService.getLikeStatus(String(user._id), String(findPost._id)) as LikesStatusCfgValues;
