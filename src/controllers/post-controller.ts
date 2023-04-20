@@ -21,11 +21,14 @@ export class PostController {
             pageSize = Number(pageSize ?? 10);
 
             const posts: IPost[] = await postService.getAll(pageNumber, pageSize, sortBy, sortDirection);
+            console.log('posts post', posts)
             const totalCount: number = await queryService.getTotalCountForPosts();
             if (posts) {
                 if (token) {
+                    console.log('token post')
                     const payload = await tokenService.getPayloadByAccessToken(token) as JWT;
                     const user = await userService.getUserById(payload.id);
+                    console.log('user p[ost', user)
                     if (user) {
                         const upgradePosts = posts.map(async (post: IPost): Promise<IPost> => {
                             post.extendedLikesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(String(post._id), LikesStatus.LIKE);
@@ -47,6 +50,7 @@ export class PostController {
                             post.extendedLikesInfo.newestLikes = await Promise.all(upgradeLikes)
                             return post
                         })
+                        console.log('upgradePosts post1', upgradePosts)
                         res.status(200).json({
                             "pagesCount": Math.ceil(totalCount / pageSize),
                             "page": pageNumber,
@@ -61,6 +65,7 @@ export class PostController {
                     post.extendedLikesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(String(post._id), LikesStatus.DISLIKE);
                     return post
                 })
+                console.log('upgradePosts post2', upgradePosts)
                 res.status(200).json({
                     "pagesCount": Math.ceil(totalCount / pageSize),
                     "page": pageNumber,

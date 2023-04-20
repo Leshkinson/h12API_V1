@@ -103,20 +103,24 @@ export class BlogController {
             const userService = new UserService();
             const tokenService = new TokenService();
             const queryService = new QueryService();
-            const postService = new PostService();
+            //const postService = new PostService();
 
             const {blogId} = req.params;
+            console.log(' blog', blogId)
             const token = req.headers.authorization?.split(' ')[1];
             let {pageNumber, pageSize, sortDirection, sortBy} = req.query as BlogsRequestWithoutSNT;
             pageNumber = Number(pageNumber ?? 1);
             pageSize = Number(pageSize ?? 10);
 
             const posts: IPost[] = await queryService.getPostsForTheBlog(blogId, pageNumber, pageSize, sortBy, sortDirection);
+            console.log('posts blog', posts)
             const totalCount: number = await queryService.getTotalCountPostsForTheBlog(blogId);
             if (posts) {
                 if (token) {
+                    console.log('token blog', token)
                     const payload = await tokenService.getPayloadByAccessToken(token) as JWT;
                     const user = await userService.getUserById(payload.id);
+                    console.log('user blog', user)
                     if (user) {
                         const upgradePosts = posts.map(async (post: IPost): Promise<IPost> => {
                             post.extendedLikesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(String(post._id), LikesStatus.LIKE);
@@ -138,6 +142,7 @@ export class BlogController {
                             post.extendedLikesInfo.newestLikes = await Promise.all(upgradeLikes)
                             return post
                         })
+                        console.log('upgradePosts blog1', upgradePosts)
                         res.status(200).json({
                             "pagesCount": Math.ceil(totalCount / pageSize),
                             "page": pageNumber,
@@ -152,6 +157,7 @@ export class BlogController {
                     post.extendedLikesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(String(post._id), LikesStatus.DISLIKE);
                     return post
                 })
+                console.log('upgradePosts blog2', upgradePosts)
                 res.status(200).json({
                     "pagesCount": Math.ceil(totalCount / pageSize),
                     "page": pageNumber,
