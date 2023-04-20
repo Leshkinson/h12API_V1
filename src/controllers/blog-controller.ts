@@ -163,7 +163,7 @@ export class BlogController {
                     "page": pageNumber,
                     "pageSize": pageSize,
                     "totalCount": totalCount,
-                    "items": upgradePosts
+                    "items": await Promise.all(upgradePosts)
                 })
             }
         } catch (error) {
