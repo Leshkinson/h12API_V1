@@ -15,7 +15,7 @@ export const rateLimitGuard = async (req: Request, res: Response, next: NextFunc
 
     if (myCache.has(`${key}`)) {
         const foo = myCache.get(`${key}`)
-        if(Number(foo) > 4) {
+        if(Number(foo) > 6) {
             res.sendStatus(429)
 
             return;
