@@ -50,7 +50,7 @@ export class PostController {
                             post.extendedLikesInfo.newestLikes = await Promise.all(upgradeLikes)
                             return post
                         })
-                        console.log('upgradePosts post1', upgradePosts)
+                        console.log('upgradePosts post1', await Promise.all(upgradePosts))
                         res.status(200).json({
                             "pagesCount": Math.ceil(totalCount / pageSize),
                             "page": pageNumber,
@@ -65,7 +65,7 @@ export class PostController {
                     post.extendedLikesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(String(post._id), LikesStatus.DISLIKE);
                     return post
                 })
-                console.log('upgradePosts post2', upgradePosts)
+                console.log('upgradePosts post2', await Promise.all(upgradePosts))
                 res.status(200).json({
                     "pagesCount": Math.ceil(totalCount / pageSize),
                     "page": pageNumber,
@@ -105,12 +105,15 @@ export class PostController {
 
             const {id} = req.params;
             const token = req.headers.authorization?.split(' ')[1];
+            console.log('token', token)
             const findPost: IPost | undefined = await postService.getOne(id);
+            console.log('findPost', findPost)
             if (findPost) {
                 if (token) {
                     const payload = await tokenService.getPayloadByAccessToken(token) as JWT;
                     const user = await userService.getUserById(payload.id);
                     if (user) {
+                        console.log('user', user)
                         findPost.extendedLikesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.LIKE);
                         findPost.extendedLikesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.DISLIKE);
                         const myStatus = await queryService.getLikeStatus(String(user._id), String(findPost._id)) as LikesStatusCfgValues;
@@ -130,6 +133,7 @@ export class PostController {
 
                         findPost.extendedLikesInfo.newestLikes = await Promise.all(upgradeLikes)
 
+                        console.log('findPost', findPost)
                         res.status(200).json(findPost);
 
                         return;

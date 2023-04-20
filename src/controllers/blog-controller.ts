@@ -142,7 +142,7 @@ export class BlogController {
                             post.extendedLikesInfo.newestLikes = await Promise.all(upgradeLikes)
                             return post
                         })
-                        console.log('upgradePosts blog1', upgradePosts)
+                        console.log('upgradePosts blog1',await Promise.all(upgradePosts))
                         res.status(200).json({
                             "pagesCount": Math.ceil(totalCount / pageSize),
                             "page": pageNumber,
@@ -157,7 +157,7 @@ export class BlogController {
                     post.extendedLikesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(String(post._id), LikesStatus.DISLIKE);
                     return post
                 })
-                console.log('upgradePosts blog2', upgradePosts)
+                console.log('upgradePosts blog2', await Promise.all(upgradePosts))
                 res.status(200).json({
                     "pagesCount": Math.ceil(totalCount / pageSize),
                     "page": pageNumber,
