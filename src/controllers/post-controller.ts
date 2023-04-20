@@ -275,8 +275,11 @@ export class PostController {
             const queryService = new QueryService();
 
             const {postId} = req.params;
+            console.log('postId', postId)
             const {likeStatus} = req.body;
+            console.log('likeStatus', likeStatus)
             const token = req.headers.authorization?.split(' ')[1];
+            console.log('token', token)
             if (token) {
                 await queryService.setUpLikeOrDislikeStatus(token, postId, likeStatus, postService)
                 res.sendStatus(204);
