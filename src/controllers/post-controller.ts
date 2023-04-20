@@ -62,8 +62,22 @@ export class PostController {
                     }
                 }
                 const upgradePosts = posts.map(async (post: IPost): Promise<IPost> => {
+                    const likes = await queryService.getLikes(String(post._id)) as ILikeStatus[];
+                    console.log('5')
+                    const upgradeLikes = likes.map(async (like: ILikeStatus): Promise<UpgradeLikes | undefined> => {
+                        const user = await userService.getUserById(like.userId)
+                        if (user) {
+                            console.log('like.createdAt', like.createdAt)
+                            return {
+                                addedAt: like.createdAt,
+                                userId: like.userId,
+                                login: user.login,
+                            }
+                        }
+                    })
                     post.extendedLikesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(String(post._id), LikesStatus.LIKE, postService);
                     post.extendedLikesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(String(post._id), LikesStatus.DISLIKE, postService);
+                    post.extendedLikesInfo.newestLikes = await Promise.all(upgradeLikes)
                     return post
                 })
                 console.log('upgradePosts post2', await Promise.all(upgradePosts))
@@ -139,7 +153,7 @@ export class PostController {
                             }
                         })
                         console.log('4')
-                        console.log('upgradeLikes get one', upgradeLikes)
+                        console.log('upgradeLikes get one', await Promise.all(upgradeLikes))
                         findPost.extendedLikesInfo.newestLikes = await Promise.all(upgradeLikes)
 
                         console.log('findPost', findPost)
@@ -148,8 +162,24 @@ export class PostController {
                         return;
                     }
                 }
+                const likes = await queryService.getLikes(id) as ILikeStatus[];
+                console.log('5')
+                const upgradeLikes = likes.map(async (like: ILikeStatus): Promise<UpgradeLikes | undefined> => {
+                    const user = await userService.getUserById(like.userId)
+                    if (user) {
+                        console.log('like.createdAt', like.createdAt)
+                        return {
+                            addedAt: like.createdAt,
+                            userId: like.userId,
+                            login: user.login,
+                        }
+                    }
+                })
+
                 findPost.extendedLikesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.LIKE, postService);
                 findPost.extendedLikesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.DISLIKE, postService);
+                findPost.extendedLikesInfo.newestLikes = await Promise.all(upgradeLikes)
+
                 res.status(200).json(findPost);
             }
         } catch (error) {
