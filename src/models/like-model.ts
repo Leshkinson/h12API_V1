@@ -1,5 +1,5 @@
 import mongoose, {Schema} from "mongoose";
-import {ILikeStatus} from "../ts/interfaces";
+import {ILikeStatus, ILikeStatusWithoutId} from "../ts/interfaces";
 
 export const LikeSchema = new Schema({
     likeStatus: {type: "string", required: true},
@@ -20,4 +20,4 @@ LikeSchema.set('toJSON', {
 
 LikeSchema.set('id', true);
 
-export const LikeModel = mongoose.model<ILikeStatus>('LikeStatus', LikeSchema)
+export const LikeModel = mongoose.model<ILikeStatus | ILikeStatusWithoutId>('LikeStatus', LikeSchema)

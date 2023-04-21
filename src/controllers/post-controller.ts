@@ -3,7 +3,7 @@ import {LikesStatus} from "../const/const";
 import {PostService} from "../services/post-service";
 import {UserService} from "../services/user-service";
 import {QueryService} from "../services/query-service";
-import {IComment, ILikeStatus, IPost, UpgradeLikes} from "../ts/interfaces";
+import {IComment, ILikeStatusWithoutId, IPost, UpgradeLikes} from "../ts/interfaces";
 import {JWT, TokenService} from "../application/token-service";
 import {CommentsRequest, LikesStatusCfgValues, PostsRequest} from "../ts/types";
 import {CommentService} from "../services/comment-service";
@@ -37,8 +37,8 @@ export class PostController {
                             const myStatus = await queryService.getLikeStatus(String(user._id), String(post._id)) as LikesStatusCfgValues;
                             if (myStatus)
                                 post.extendedLikesInfo.myStatus = myStatus;
-                            const likes = await queryService.getLikes(String(post._id)) as ILikeStatus[];
-                            const upgradeLikes = likes.map(async (like: ILikeStatus): Promise<UpgradeLikes | undefined> => {
+                            const likes = await queryService.getLikes(String(post._id)) as ILikeStatusWithoutId[];
+                            const upgradeLikes = likes.map(async (like: ILikeStatusWithoutId): Promise<UpgradeLikes | undefined> => {
                                 const user = await userService.getUserById(like.userId)
                                 if (user) {
                                     return {
@@ -62,9 +62,9 @@ export class PostController {
                     }
                 }
                 const upgradePosts = posts.map(async (post: IPost): Promise<IPost> => {
-                    const likes = await queryService.getLikes(String(post._id)) as ILikeStatus[];
+                    const likes = await queryService.getLikes(String(post._id)) as ILikeStatusWithoutId[];
                     console.log('5')
-                    const upgradeLikes = likes.map(async (like: ILikeStatus): Promise<UpgradeLikes | undefined> => {
+                    const upgradeLikes = likes.map(async (like: ILikeStatusWithoutId): Promise<UpgradeLikes | undefined> => {
                         const user = await userService.getUserById(like.userId)
                         if (user) {
                             console.log('like.createdAt', like.createdAt)
@@ -119,32 +119,22 @@ export class PostController {
             const postService = new PostService();
 
             const {id} = req.params;
-            console.log('id', id)
             const token = req.headers.authorization?.split(' ')[1];
-            console.log('token', token)
             const findPost: IPost | undefined = await postService.getOne(id);
-            console.log('findPost', findPost)
             if (findPost) {
                 if (token) {
                     const payload = await tokenService.getPayloadByAccessToken(token) as JWT;
                     const user = await userService.getUserById(payload.id);
                     if (user) {
-                        console.log('user', user)
-                        console.log('findPost.extendedLikesInfo.likesCount before', findPost.extendedLikesInfo.likesCount)
                         findPost.extendedLikesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.LIKE, postService);
-                        console.log('findPost.extendedLikesInfo.likesCount after', findPost.extendedLikesInfo.likesCount)
-                        console.log('1')
                         findPost.extendedLikesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.DISLIKE, postService);
                         const myStatus = await queryService.getLikeStatus(String(user._id), String(findPost._id)) as LikesStatusCfgValues;
-                        console.log('2')
                         if (myStatus)
                             findPost.extendedLikesInfo.myStatus = myStatus;
-                        const likes = await queryService.getLikes(id) as ILikeStatus[];
-                        console.log('3')
-                        const upgradeLikes = likes.map(async (like: ILikeStatus): Promise<UpgradeLikes | undefined> => {
+                        const likes = await queryService.getLikes(id) as ILikeStatusWithoutId[];
+                        const upgradeLikes = likes.map(async (like: ILikeStatusWithoutId): Promise<UpgradeLikes | undefined> => {
                             const user = await userService.getUserById(like.userId)
                             if (user) {
-                                console.log('like.createdAt', like.createdAt)
                                 return {
                                     addedAt: like.createdAt,
                                     userId: like.userId,
@@ -152,22 +142,16 @@ export class PostController {
                                 }
                             }
                         })
-                        console.log('4')
-                        console.log('upgradeLikes get one', await Promise.all(upgradeLikes))
                         findPost.extendedLikesInfo.newestLikes = await Promise.all(upgradeLikes)
-
-                        console.log('findPost', findPost)
                         res.status(200).json(findPost);
 
                         return;
                     }
                 }
-                const likes = await queryService.getLikes(id) as ILikeStatus[];
-                console.log('5')
-                const upgradeLikes = likes.map(async (like: ILikeStatus): Promise<UpgradeLikes | undefined> => {
+                const likes = await queryService.getLikes(id) as ILikeStatusWithoutId[];
+                const upgradeLikes = likes.map(async (like: ILikeStatusWithoutId): Promise<UpgradeLikes | undefined> => {
                     const user = await userService.getUserById(like.userId)
                     if (user) {
-                        console.log('like.createdAt', like.createdAt)
                         return {
                             addedAt: like.createdAt,
                             userId: like.userId,

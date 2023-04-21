@@ -1,4 +1,4 @@
-import {JwtPayload} from "jsonwebtoken";
+//import {JwtPayload} from "jsonwebtoken";
 import {BlogModel} from "../models/blog-model";
 import {PostModel} from "../models/post-model";
 import {UserModel} from "../models/user-model";
@@ -9,7 +9,7 @@ import {BlogsRepository} from "../repositories/blogs-repository";
 import {PostsRepository} from "../repositories/posts-repository";
 import {UsersRepository} from "../repositories/users-repository";
 import {CommentsRepository} from "../repositories/comments-repository";
-import {IBlog, IComment, ILikeStatus, IPost, IUser} from "../ts/interfaces";
+import {IBlog, IComment, ILikeStatus, ILikeStatusWithoutId, IPost, IUser} from "../ts/interfaces";
 import {LikeRepository} from "../repositories/like-repository";
 import {UserService} from "./user-service";
 import {CommentService} from "./comment-service";
@@ -129,10 +129,10 @@ export class QueryService {
         return this.commentModel.find({postId: (post?._id)?.toString()}).count();
     }
 
-    public async makeLikeStatusForTheComment(likeStatus: string, commentOrPostId: string, userId: string): Promise<ILikeStatus | null> {
+    public async makeLikeStatusForTheComment(likeStatus: string, commentOrPostId: string, userId: string): Promise<ILikeStatus | ILikeStatusWithoutId | null> {
         const like = await this.likeRepository.findLike(userId, commentOrPostId);
         if (like) {
-            return await this.changeLikeStatusForTheComment(String(like?._id), likeStatus);
+            return await this.changeLikeStatusForTheComment(String(like._id), likeStatus);
         }
 
         return await this.likeRepository.createLike(commentOrPostId, userId, likeStatus);
@@ -141,7 +141,6 @@ export class QueryService {
     public async changeLikeStatusForTheComment(likeId: string, likeStatus: string): Promise<ILikeStatus | null> {
         const like = await this.likeRepository.findLikeById(likeId);
         if(like?.likeStatus !== likeStatus){
-            // return await this.likeRepository.updateLikeStatus(likeId, 'None')
             return await this.likeRepository.updateLikeStatus(likeId, likeStatus)
         }
         return like
@@ -162,7 +161,7 @@ export class QueryService {
             return like.likeStatus
     }
 
-    public async setUpLikeOrDislikeStatus(token: string, commentOrPostId: string, likeStatus: string, service: CommentService | PostService): Promise<ILikeStatus | null> {
+    public async setUpLikeOrDislikeStatus(token: string, commentOrPostId: string, likeStatus: string, service: CommentService | PostService): Promise<ILikeStatus | ILikeStatusWithoutId | null> {
         const userService = new UserService();
         const tokenService = new TokenService();
 
@@ -178,7 +177,7 @@ export class QueryService {
         return await this.makeLikeStatusForTheComment(likeStatus, commentOrPostId, String(user._id));
     }
 
-    public async getLikes(id: string): Promise<ILikeStatus[] | null> {
+    public async getLikes(id: string): Promise<ILikeStatus[]| ILikeStatusWithoutId[] | null> {
         return  await this.likeRepository.findLikes(id)
     }
 
