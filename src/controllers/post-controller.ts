@@ -168,15 +168,21 @@ export class PostController {
                             return result.filter((item: UpgradeLikes | undefined) => !!item);
                         }
                         console.log('await Promise.all(upgradeLikes)3', await getUpgradeLikes(likes))
-                        findPost.extendedLikesInfo.newestLikes = await getUpgradeLikes(likes) as UpgradeLikes[]
+                        findPost.extendedLikesInfo.newestLikes = await getUpgradeLikes(likes)
                         console.log('findPost.extendedLikesInfo.newestLikes3', findPost.extendedLikesInfo.newestLikes)
+                        findPost.extendedLikesInfo.newestLikes.forEach((findPost) => {
+                            if (findPost) {
+                                // @ts-ignore
+                                delete findPost['_id']
+                            }
+                        })
                         res.status(200).json(findPost);
 
                         return;
                     }
                 }
                 const likes = await queryService.getLikes(id) as ILikeStatusWithoutId[];
-                const upgradeLikes = likes.map(async (like: ILikeStatusWithoutId): Promise<UpgradeLikes | undefined> => {
+                const upgradeLikes = likes.map(async (like: ILikeStatusWithoutId) => {
                     const user = await userService.getUserById(like.userId)
                     if (user) {
                         return {
@@ -189,8 +195,14 @@ export class PostController {
                 console.log('await Promise.all(upgradeLikes)4', await Promise.all(upgradeLikes))
                 findPost.extendedLikesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.LIKE, postService);
                 findPost.extendedLikesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.DISLIKE, postService);
-                findPost.extendedLikesInfo.newestLikes = await Promise.all(upgradeLikes) as UpgradeLikes[]
+                findPost.extendedLikesInfo.newestLikes = await Promise.all(upgradeLikes)
                 console.log('findPost.extendedLikesInfo.newestLikes4', findPost.extendedLikesInfo.newestLikes)
+                findPost.extendedLikesInfo.newestLikes.forEach((findPost) => {
+                    if (findPost) {
+                        // @ts-ignore
+                        delete findPost['_id']
+                    }
+                })
                 res.status(200).json(findPost);
             }
         } catch (error) {
