@@ -36,18 +36,26 @@ export class PostController {
                             if (myStatus)
                                 post.extendedLikesInfo.myStatus = myStatus;
                             const likes = await queryService.getLikes(String(post._id)) as ILikeStatusWithoutId[];
-                            const upgradeLikes = likes.map(async (like: ILikeStatusWithoutId): Promise<UpgradeLikes | undefined> => {
-                                const user = await userService.getUserById(like.userId)
-                                if (user) {
-                                    return {
-                                        addedAt: like.createdAt,
-                                        userId: like.userId,
-                                        login: user.login,
-                                    }
-                                }
-                            })
-                            console.log('await Promise.all(upgradeLikes)1', await Promise.all(upgradeLikes))
-                            post.extendedLikesInfo.newestLikes = await Promise.all(upgradeLikes) as UpgradeLikes[]
+
+                            async function getUpgradeLikes(likes: ILikeStatusWithoutId[]): Promise<(UpgradeLikes | undefined)[]> {
+                                const result: (UpgradeLikes | undefined)[]  = await Promise.all(
+                                    likes.map(async (like: ILikeStatusWithoutId): Promise<UpgradeLikes | undefined> => {
+                                            const user = await userService.getUserById(like.userId)
+                                            if (user) {
+                                                return {
+                                                    addedAt: like.createdAt,
+                                                    userId: like.userId,
+                                                    login: user.login,
+                                                }
+                                            }
+                                        }
+                                    ));
+
+                                return result.filter((item: UpgradeLikes | undefined) => !!item);
+                            }
+
+                            console.log('await Promise.all(upgradeLikes)1', await getUpgradeLikes(likes))
+                            post.extendedLikesInfo.newestLikes = await getUpgradeLikes(likes) as UpgradeLikes[];
                             console.log('findPost.extendedLikesInfo.newestLikes2', post.extendedLikesInfo.newestLikes)
                             return post
                         })

@@ -59,12 +59,12 @@ export interface ILikeStatus {
     createdAt: Date
 }
 
-export interface ILikeStatus {
-    _id: mongoose.Schema.Types.ObjectId;
-    likeStatus: LikesStatusCfgValues;
-    userId: string,
-    createdAt: Date
-}
+// export interface ILikeStatus {
+//     _id: mongoose.Schema.Types.ObjectId;
+//     likeStatus: LikesStatusCfgValues;
+//     userId: string,
+//     createdAt: Date
+// }
 
 export interface ILikeStatusWithoutId {
     likeStatus: LikesStatusCfgValues;
