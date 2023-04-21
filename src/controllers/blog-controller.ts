@@ -1,5 +1,5 @@
 import {Request, Response} from "express";
-import {IBlog, ILikeStatus, IPost, UpgradeLikes} from "../ts/interfaces";
+import {IBlog, ILikeStatusWithoutId, IPost, UpgradeLikes} from "../ts/interfaces";
 import {BlogService} from "../services/blog-service";
 import {QueryService} from "../services/query-service";
 import {BlogsRequest, BlogsRequestWithoutSNT, LikesStatusCfgValues} from "../ts/types";
@@ -106,21 +106,17 @@ export class BlogController {
             const postService = new PostService();
 
             const {blogId} = req.params;
-            console.log(' blog', blogId)
             const token = req.headers.authorization?.split(' ')[1];
             let {pageNumber, pageSize, sortDirection, sortBy} = req.query as BlogsRequestWithoutSNT;
             pageNumber = Number(pageNumber ?? 1);
             pageSize = Number(pageSize ?? 10);
 
             const posts: IPost[] = await queryService.getPostsForTheBlog(blogId, pageNumber, pageSize, sortBy, sortDirection);
-            console.log('posts blog', posts)
             const totalCount: number = await queryService.getTotalCountPostsForTheBlog(blogId);
             if (posts) {
                 if (token) {
-                    console.log('token blog', token)
                     const payload = await tokenService.getPayloadByAccessToken(token) as JWT;
                     const user = await userService.getUserById(payload.id);
-                    console.log('user blog', user)
                     if (user) {
                         const upgradePosts = posts.map(async (post: IPost): Promise<IPost> => {
                             post.extendedLikesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(String(post._id), LikesStatus.LIKE, postService);
@@ -128,8 +124,8 @@ export class BlogController {
                             const myStatus = await queryService.getLikeStatus(String(user._id), String(post._id)) as LikesStatusCfgValues;
                             if (myStatus)
                                 post.extendedLikesInfo.myStatus = myStatus;
-                            const likes = await queryService.getLikes(String(post._id)) as ILikeStatus[];
-                            const upgradeLikes = likes.map(async (like: ILikeStatus): Promise<UpgradeLikes | undefined> => {
+                            const likes = await queryService.getLikes(String(post._id)) as ILikeStatusWithoutId[];
+                            const upgradeLikes = likes.map(async (like: ILikeStatusWithoutId): Promise<UpgradeLikes | undefined> => {
                                 const user = await userService.getUserById(like.userId)
                                 if (user) {
                                     return {
@@ -139,7 +135,7 @@ export class BlogController {
                                     }
                                 }
                             })
-                            post.extendedLikesInfo.newestLikes = await Promise.all(upgradeLikes)
+                            post.extendedLikesInfo.newestLikes = await Promise.all(upgradeLikes) as UpgradeLikes[]
                             return post
                         })
                         console.log('upgradePosts blog1',await Promise.all(upgradePosts))
@@ -153,12 +149,10 @@ export class BlogController {
                     }
                 }
                 const upgradePosts = posts.map(async (post: IPost): Promise<IPost> => {
-                    const likes = await queryService.getLikes(String(post._id)) as ILikeStatus[];
-                    console.log('5')
-                    const upgradeLikes = likes.map(async (like: ILikeStatus): Promise<UpgradeLikes | undefined> => {
+                    const likes = await queryService.getLikes(String(post._id)) as ILikeStatusWithoutId[];
+                    const upgradeLikes = likes.map(async (like: ILikeStatusWithoutId): Promise<UpgradeLikes | undefined> => {
                         const user = await userService.getUserById(like.userId)
                         if (user) {
-                            console.log('like.createdAt', like.createdAt)
                             return {
                                 addedAt: like.createdAt,
                                 userId: like.userId,
@@ -169,7 +163,7 @@ export class BlogController {
 
                     post.extendedLikesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(String(post._id), LikesStatus.LIKE, postService);
                     post.extendedLikesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(String(post._id), LikesStatus.DISLIKE, postService);
-                    post.extendedLikesInfo.newestLikes = await Promise.all(upgradeLikes)
+                    post.extendedLikesInfo.newestLikes = await Promise.all(upgradeLikes) as UpgradeLikes[]
                     return post
                 })
                 console.log('upgradePosts blog2', await Promise.all(upgradePosts))

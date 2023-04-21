@@ -47,7 +47,7 @@ export class PostController {
                                 }
                             })
                             console.log('await Promise.all(upgradeLikes)1', await Promise.all(upgradeLikes))
-                            post.extendedLikesInfo.newestLikes = await Promise.all(upgradeLikes)
+                            post.extendedLikesInfo.newestLikes = await Promise.all(upgradeLikes) as UpgradeLikes[]
                             console.log('findPost.extendedLikesInfo.newestLikes2', post.extendedLikesInfo.newestLikes)
                             return post
                         })
@@ -76,7 +76,7 @@ export class PostController {
                     console.log('await Promise.all(upgradeLikes)2', await Promise.all(upgradeLikes))
                     post.extendedLikesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(String(post._id), LikesStatus.LIKE, postService);
                     post.extendedLikesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(String(post._id), LikesStatus.DISLIKE, postService);
-                    post.extendedLikesInfo.newestLikes = await Promise.all(upgradeLikes)
+                    post.extendedLikesInfo.newestLikes = await Promise.all(upgradeLikes) as UpgradeLikes[]
                     console.log('findPost.extendedLikesInfo.newestLikes2', post.extendedLikesInfo.newestLikes)
                     return post
                 })
@@ -143,7 +143,7 @@ export class PostController {
                             }
                         })
                         console.log('await Promise.all(upgradeLikes)3', await Promise.all(upgradeLikes))
-                        findPost.extendedLikesInfo.newestLikes = await Promise.all(upgradeLikes)
+                        findPost.extendedLikesInfo.newestLikes = await Promise.all(upgradeLikes) as UpgradeLikes[]
                         console.log('findPost.extendedLikesInfo.newestLikes3', findPost.extendedLikesInfo.newestLikes)
                         res.status(200).json(findPost);
 
@@ -164,7 +164,7 @@ export class PostController {
                 console.log('await Promise.all(upgradeLikes)4', await Promise.all(upgradeLikes))
                 findPost.extendedLikesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.LIKE, postService);
                 findPost.extendedLikesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.DISLIKE, postService);
-                findPost.extendedLikesInfo.newestLikes = await Promise.all(upgradeLikes)
+                findPost.extendedLikesInfo.newestLikes = await Promise.all(upgradeLikes) as UpgradeLikes[]
                 console.log('findPost.extendedLikesInfo.newestLikes4', findPost.extendedLikesInfo.newestLikes)
                 res.status(200).json(findPost);
             }
