@@ -130,7 +130,7 @@ export class QueryService {
     }
 
     public async makeLikeStatusForTheComment(likeStatus: string, commentOrPostId: string, userId: string): Promise<ILikeStatus | ILikeStatusWithoutId | null> {
-        const like = await this.likeRepository.findLike(userId, commentOrPostId);
+        const like = await this.likeRepository.findLike(userId, commentOrPostId) as ILikeStatus;
         if (like) {
             return await this.changeLikeStatusForTheComment(String(like._id), likeStatus);
         }
@@ -138,7 +138,7 @@ export class QueryService {
         return await this.likeRepository.createLike(commentOrPostId, userId, likeStatus);
     }
 
-    public async changeLikeStatusForTheComment(likeId: string, likeStatus: string): Promise<ILikeStatus | null> {
+    public async changeLikeStatusForTheComment(likeId: string, likeStatus: string): Promise<ILikeStatus| ILikeStatusWithoutId | null> {
         const like = await this.likeRepository.findLikeById(likeId);
         if(like?.likeStatus !== likeStatus){
             return await this.likeRepository.updateLikeStatus(likeId, likeStatus)
@@ -170,9 +170,6 @@ export class QueryService {
         const commentOrPost: IComment | IPost | undefined = await service.getOne(commentOrPostId);
         if (!user || !commentOrPost) {
             throw new Error()
-            // res.sendStatus(404);
-            //
-            // return;
         }
         return await this.makeLikeStatusForTheComment(likeStatus, commentOrPostId, String(user._id));
     }
