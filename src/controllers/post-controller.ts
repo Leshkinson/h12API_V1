@@ -152,7 +152,7 @@ export class PostController {
                         // })
 
                         async function getUpgradeLikes(likes: ILikeStatusWithoutId[]): Promise<(UpgradeLikes | undefined)[]> {
-                            const result: (UpgradeLikes | undefined)[]  = await Promise.all(
+                            const result: (UpgradeLikes | undefined)[] = await Promise.all(
                                 likes.map(async (like: ILikeStatusWithoutId): Promise<UpgradeLikes | undefined> => {
                                         const user = await userService.getUserById(like.userId)
                                         if (user) {
