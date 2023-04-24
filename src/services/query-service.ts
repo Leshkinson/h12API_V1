@@ -9,7 +9,7 @@ import {BlogsRepository} from "../repositories/blogs-repository";
 import {PostsRepository} from "../repositories/posts-repository";
 import {UsersRepository} from "../repositories/users-repository";
 import {CommentsRepository} from "../repositories/comments-repository";
-import {IBlog, IComment, ILikeStatus, ILikeStatusWithoutId, IPost, IUser} from "../ts/interfaces";
+import {IBlog, IComment, ILikeStatus, ILikeStatusWithoutId, IPost, IUser, UpgradeLikes} from "../ts/interfaces";
 import {LikeRepository} from "../repositories/like-repository";
 import {UserService} from "./user-service";
 import {CommentService} from "./comment-service";
@@ -174,8 +174,8 @@ export class QueryService {
         return await this.makeLikeStatusForTheComment(likeStatus, commentOrPostId, String(user._id));
     }
 
-    public async getLikes(id: string): Promise<ILikeStatus[]| ILikeStatusWithoutId[] | null> {
-        return  await this.likeRepository.findLikes(id)
+    public async getLikes(id: string): Promise<UpgradeLikes[] | undefined> {
+        return  await this.likeRepository.testLike(id)
     }
 
     public async testingDelete(): Promise<void> {

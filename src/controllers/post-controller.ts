@@ -137,7 +137,8 @@ export class PostController {
                         const myStatus = await queryService.getLikeStatus(String(user._id), String(findPost._id)) as LikesStatusCfgValues;
                         if (myStatus)
                             findPost.extendedLikesInfo.myStatus = myStatus;
-                        const likes = await queryService.getLikes(id) as ILikeStatusWithoutId[];
+                        const likes = await queryService.getLikes(id) as UpgradeLikes[];
+                        console.log('Likes', likes)
                         // const upgradeLikes = likes.map(async (like: ILikeStatusWithoutId): Promise<UpgradeLikes | undefined> => {
                         //     const user = await userService.getUserById(like.userId)
                         //     if (user) {
@@ -149,45 +150,46 @@ export class PostController {
                         //     }
                         // })
 
-                        async function getUpgradeLikes(likes: ILikeStatusWithoutId[]): Promise<(UpgradeLikes | undefined)[]> {
-                            const result: (UpgradeLikes | undefined)[] = await Promise.all(
-                                likes.map(async (like: ILikeStatusWithoutId): Promise<UpgradeLikes | undefined> => {
-                                        const user = await userService.getUserById(like.userId)
-                                        if (user) {
-                                            return {
-                                                addedAt: like.createdAt,
-                                                userId: like.userId,
-                                                login: user.login,
-                                            }
-                                        }
-                                    }
-                                ));
+                        // async function getUpgradeLikes(likes: ILikeStatusWithoutId[]): Promise<(UpgradeLikes | undefined)[]> {
+                        //     const result: (UpgradeLikes | undefined)[] = await Promise.all(
+                        //         likes.map(async (like: ILikeStatusWithoutId): Promise<UpgradeLikes | undefined> => {
+                        //                 const user = await userService.getUserById(like.userId)
+                        //                 if (user) {
+                        //                     return {
+                        //                         addedAt: like.createdAt,
+                        //                         userId: like.userId,
+                        //                         login: user.login,
+                        //                     }
+                        //                 }
+                        //             }
+                        //         ));
+                        //
+                        //     return result.filter((item: UpgradeLikes | undefined) => !!item);
+                        // }
 
-                            return result.filter((item: UpgradeLikes | undefined) => !!item);
-                        }
-
-                        findPost.extendedLikesInfo.newestLikes = await getUpgradeLikes(likes);
+                        // findPost.extendedLikesInfo.newestLikes = await getUpgradeLikes(likes);
+                        findPost.extendedLikesInfo.newestLikes = likes;
 
                         res.status(200).json(findPost);
 
                         return;
                     }
                 }
-                const likes = await queryService.getLikes(id) as ILikeStatusWithoutId[];
-                const upgradeLikes = likes.map(async (like: ILikeStatusWithoutId) => {
-                    const user = await userService.getUserById(like.userId)
-                    if (user) {
-                        return {
-                            addedAt: like.createdAt,
-                            userId: like.userId,
-                            login: user.login,
-                        }
-                    }
-                })
+                const likes = await queryService.getLikes(id) as UpgradeLikes[];
+                // const upgradeLikes = likes.map(async (like: ILikeStatusWithoutId) => {
+                //     const user = await userService.getUserById(like.userId)
+                //     if (user) {
+                //         return {
+                //             addedAt: like.createdAt,
+                //             userId: like.userId,
+                //             login: user.login,
+                //         }
+                //     }
+                // })
 
                 findPost.extendedLikesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.LIKE, postService);
                 findPost.extendedLikesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.DISLIKE, postService);
-                findPost.extendedLikesInfo.newestLikes = await Promise.all(upgradeLikes);
+                findPost.extendedLikesInfo.newestLikes = likes;
 
                 res.status(200).json(findPost);
             }
