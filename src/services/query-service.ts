@@ -174,8 +174,8 @@ export class QueryService {
         return await this.makeLikeStatusForTheComment(likeStatus, commentOrPostId, String(user._id));
     }
 
-    public async getLikes(id: string): Promise<UpgradeLikes[] | undefined> {
-        return  await this.likeRepository.testLike(id)
+    public async getLikes(id: string): Promise<ILikeStatus[] | ILikeStatusWithoutId[] | null> {
+        return  await this.likeRepository.findLikes(id)
     }
 
     public async testingDelete(): Promise<void> {

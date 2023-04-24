@@ -137,7 +137,7 @@ export class PostController {
                         const myStatus = await queryService.getLikeStatus(String(user._id), String(findPost._id)) as LikesStatusCfgValues;
                         if (myStatus)
                             findPost.extendedLikesInfo.myStatus = myStatus;
-                        const likes = await queryService.getLikes(id) as UpgradeLikes[];
+                        const likes = await queryService.getLikes(id) as ILikeStatusWithoutId[];
                         console.log('Likes', likes)
                         // const upgradeLikes = likes.map(async (like: ILikeStatusWithoutId): Promise<UpgradeLikes | undefined> => {
                         //     const user = await userService.getUserById(like.userId)
@@ -175,7 +175,7 @@ export class PostController {
                         return;
                     }
                 }
-                const likes = await queryService.getLikes(id) as UpgradeLikes[];
+                const likes = await queryService.getLikes(id) as ILikeStatusWithoutId[];
                 // const upgradeLikes = likes.map(async (like: ILikeStatusWithoutId) => {
                 //     const user = await userService.getUserById(like.userId)
                 //     if (user) {
