@@ -26,7 +26,7 @@ export class LikeRepository {
     }
 
     public async findLikes(id: RefType): Promise<ILikeStatus[] | ILikeStatusWithoutId[] | null> {
-        return this.likeModel.find({$and:[{commentOrPostId: id}, {"likeStatus": "Like"}]}).sort({"createdAt": "desc"}).limit(3)
+        return this.likeModel.find({$and:[{commentOrPostId: id}, {"likeStatus": "Like"}]}).sort({"createdAt": "desc"}).limit(3).lean()
     }
 
     public async countingLikeOrDislike(commentOrPostId: string, param: string): Promise<number> {
@@ -35,5 +35,9 @@ export class LikeRepository {
 
     public async deleteAll() {
         return this.likeModel.deleteMany();
+    }
+
+    public async testLike() {
+
     }
 }
