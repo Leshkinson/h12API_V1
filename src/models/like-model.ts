@@ -18,6 +18,6 @@ LikeSchema.set('toJSON', {
     }
 });
 
-LikeSchema.set('id', true);
+//LikeSchema.set('id', true);
 
 export const LikeModel = mongoose.model<ILikeStatusWithoutId>('LikeStatus', LikeSchema)
