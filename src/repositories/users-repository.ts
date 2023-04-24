@@ -23,7 +23,7 @@ export class UsersRepository {
     }
 
     public async findUserById(id: string | JwtPayload): Promise<IUser | null> {
-        return this.userModel.findById({_id: id})
+        return this.userModel.findById({_id: id}).lean()
     }
 
     public async findUserByParam(param: string): Promise<IUser | null> {

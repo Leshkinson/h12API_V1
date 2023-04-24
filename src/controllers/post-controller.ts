@@ -54,12 +54,11 @@ export class PostController {
                                 return result.filter((item: UpgradeLikes | undefined) => !!item);
                             }
 
-                            console.log('await Promise.all(upgradeLikes)1', await getUpgradeLikes(likes))
                             post.extendedLikesInfo.newestLikes = await getUpgradeLikes(likes) as UpgradeLikes[];
-                            console.log('findPost.extendedLikesInfo.newestLikes2', post.extendedLikesInfo.newestLikes)
+
                             return post
                         })
-                        console.log('upgradePosts post1', await Promise.all(upgradePosts))
+
                         res.status(200).json({
                             "pagesCount": Math.ceil(totalCount / pageSize),
                             "page": pageNumber,
@@ -81,14 +80,13 @@ export class PostController {
                             }
                         }
                     })
-                    console.log('await Promise.all(upgradeLikes)2', await Promise.all(upgradeLikes))
                     post.extendedLikesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(String(post._id), LikesStatus.LIKE, postService);
                     post.extendedLikesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(String(post._id), LikesStatus.DISLIKE, postService);
-                    post.extendedLikesInfo.newestLikes = await Promise.all(upgradeLikes) as UpgradeLikes[]
-                    console.log('findPost.extendedLikesInfo.newestLikes2', post.extendedLikesInfo.newestLikes)
-                    return post
+                    post.extendedLikesInfo.newestLikes = await Promise.all(upgradeLikes) as UpgradeLikes[];
+
+                    return post;
                 })
-                console.log('upgradePosts post2', await Promise.all(upgradePosts))
+
                 res.status(200).json({
                     "pagesCount": Math.ceil(totalCount / pageSize),
                     "page": pageNumber,
@@ -167,15 +165,9 @@ export class PostController {
 
                             return result.filter((item: UpgradeLikes | undefined) => !!item);
                         }
-                        console.log('await Promise.all(upgradeLikes)3', await getUpgradeLikes(likes))
-                        findPost.extendedLikesInfo.newestLikes = await getUpgradeLikes(likes)
-                        console.log('findPost.extendedLikesInfo.newestLikes3', findPost.extendedLikesInfo.newestLikes)
-                        findPost.extendedLikesInfo.newestLikes.forEach((findPost) => {
-                            if (findPost) {
-                                // @ts-ignore
-                                delete findPost['_id']
-                            }
-                        })
+
+                        findPost.extendedLikesInfo.newestLikes = await getUpgradeLikes(likes);
+
                         res.status(200).json(findPost);
 
                         return;
@@ -192,17 +184,11 @@ export class PostController {
                         }
                     }
                 })
-                console.log('await Promise.all(upgradeLikes)4', await Promise.all(upgradeLikes))
+
                 findPost.extendedLikesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.LIKE, postService);
                 findPost.extendedLikesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.DISLIKE, postService);
-                findPost.extendedLikesInfo.newestLikes = await Promise.all(upgradeLikes)
-                console.log('findPost.extendedLikesInfo.newestLikes4', findPost.extendedLikesInfo.newestLikes)
-                findPost.extendedLikesInfo.newestLikes.forEach((findPost) => {
-                    if (findPost) {
-                        // @ts-ignore
-                        delete findPost['_id']
-                    }
-                })
+                findPost.extendedLikesInfo.newestLikes = await Promise.all(upgradeLikes);
+
                 res.status(200).json(findPost);
             }
         } catch (error) {
