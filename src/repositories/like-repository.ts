@@ -37,14 +37,5 @@ export class LikeRepository {
         return this.likeModel.deleteMany();
     }
 
-    public async testLike(id: RefType): Promise<UpgradeLikes[] | undefined> {
-        const likes = await this.likeModel.find({$and:[{commentOrPostId: id}, {"likeStatus": "Like"}]}).sort({"createdAt": "desc"}).limit(3)
-        return likes.map((like: ILikeStatusWithoutId) => {
-            return {
-                addedAt: like.createdAt,
-                userId: like.userId,
-                login: ''
-            }
-        })
-    }
+
 }

@@ -150,25 +150,25 @@ export class PostController {
                         //     }
                         // })
 
-                        // async function getUpgradeLikes(likes: ILikeStatusWithoutId[]): Promise<(UpgradeLikes | undefined)[]> {
-                        //     const result: (UpgradeLikes | undefined)[] = await Promise.all(
-                        //         likes.map(async (like: ILikeStatusWithoutId): Promise<UpgradeLikes | undefined> => {
-                        //                 const user = await userService.getUserById(like.userId)
-                        //                 if (user) {
-                        //                     return {
-                        //                         addedAt: like.createdAt,
-                        //                         userId: like.userId,
-                        //                         login: user.login,
-                        //                     }
-                        //                 }
-                        //             }
-                        //         ));
-                        //
-                        //     return result.filter((item: UpgradeLikes | undefined) => !!item);
-                        // }
+                        async function getUpgradeLikes(likes: ILikeStatusWithoutId[]): Promise<(UpgradeLikes | undefined)[]> {
+                            const result: (UpgradeLikes | undefined)[] = await Promise.all(
+                                likes.map(async (like: ILikeStatusWithoutId): Promise<UpgradeLikes | undefined> => {
+                                        const user = await userService.getUserById(like.userId)
+                                        if (user) {
+                                            return {
+                                                addedAt: like.createdAt,
+                                                userId: like.userId,
+                                                login: user.login,
+                                            }
+                                        }
+                                    }
+                                ));
 
-                        // findPost.extendedLikesInfo.newestLikes = await getUpgradeLikes(likes);
-                        findPost.extendedLikesInfo.newestLikes = likes;
+                            return result.filter((item: UpgradeLikes | undefined) => !!item);
+                        }
+
+                        findPost.extendedLikesInfo.newestLikes = await getUpgradeLikes(likes);
+
 
                         res.status(200).json(findPost);
 
@@ -176,20 +176,20 @@ export class PostController {
                     }
                 }
                 const likes = await queryService.getLikes(id) as ILikeStatusWithoutId[];
-                // const upgradeLikes = likes.map(async (like: ILikeStatusWithoutId) => {
-                //     const user = await userService.getUserById(like.userId)
-                //     if (user) {
-                //         return {
-                //             addedAt: like.createdAt,
-                //             userId: like.userId,
-                //             login: user.login,
-                //         }
-                //     }
-                // })
+                const upgradeLikes = likes.map(async (like: ILikeStatusWithoutId): Promise<UpgradeLikes[] | null> => {
+                    const user = await userService.getUserById(like.userId)
+                    if (user) {
+                        return {
+                            addedAt: like.createdAt,
+                            userId: like.userId,
+                            login: user.login,
+                        }
+                    }
+                })
 
                 findPost.extendedLikesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.LIKE, postService);
                 findPost.extendedLikesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.DISLIKE, postService);
-                findPost.extendedLikesInfo.newestLikes = likes;
+                findPost.extendedLikesInfo.newestLikes = upgradeLikes;
 
                 res.status(200).json(findPost);
             }
