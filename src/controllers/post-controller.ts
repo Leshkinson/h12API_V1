@@ -176,7 +176,7 @@ export class PostController {
                     }
                 }
                 const likes = await queryService.getLikes(id) as ILikeStatusWithoutId[];
-                const upgradeLikes = likes.map(async (like: ILikeStatusWithoutId): Promise<UpgradeLikes[] | null> => {
+                const upgradeLikes = likes.map(async (like: ILikeStatusWithoutId): Promise<UpgradeLikes | undefined> => {
                     const user = await userService.getUserById(like.userId)
                     if (user) {
                         return {
@@ -189,7 +189,7 @@ export class PostController {
 
                 findPost.extendedLikesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.LIKE, postService);
                 findPost.extendedLikesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(id, LikesStatus.DISLIKE, postService);
-                findPost.extendedLikesInfo.newestLikes = upgradeLikes;
+                findPost.extendedLikesInfo.newestLikes = await Promise.all(upgradeLikes);
 
                 res.status(200).json(findPost);
             }
