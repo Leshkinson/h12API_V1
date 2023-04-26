@@ -33,3 +33,5 @@ const start = async (): Promise<void> => {
 start()
     .then(() => console.log('Good start'))
     .catch(error => console.log(error.message))
+
+module.exports = app;
