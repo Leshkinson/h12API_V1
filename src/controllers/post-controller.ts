@@ -321,6 +321,7 @@ export class PostController {
 
     static async sendLikeOrDislikeStatus(req: Request, res: Response) {
         try {
+            console.log('Request', req)
             const postService = new PostService();
             const queryService = new QueryService();
 
