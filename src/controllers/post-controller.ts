@@ -167,6 +167,8 @@ export class PostController {
                             return result.filter((item: UpgradeLikes | undefined) => !!item);
                         }
 
+                        console.log('upgradeLikes get one post', await getUpgradeLikes(likes))
+
                         findPost.extendedLikesInfo.newestLikes = await getUpgradeLikes(likes);
 
 
