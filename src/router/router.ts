@@ -55,7 +55,7 @@ router.delete('/comments/:id', authMiddleware, CommentController.deleteComment);
 router.get('/comments/:id', CommentController.getOneComment);
 
 /**Auth**/
-router.post('/auth/login', rateLimitGuard, AuthController.login);
+router.post('/auth/login', AuthController.login);
 router.post('/auth/logout', AuthController.logout);
 router.post('/auth/registration-confirmation', rateLimitGuard, codeConfirmed, isErrorMiddleware, AuthController.confirmEmail);
 router.post('/auth/registration', rateLimitGuard, userValidation, isErrorMiddleware, AuthController.registration);
