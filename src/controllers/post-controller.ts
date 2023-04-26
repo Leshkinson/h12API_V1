@@ -171,7 +171,7 @@ export class PostController {
 
                         findPost.extendedLikesInfo.newestLikes = await getUpgradeLikes(likes);
 
-                        console.log('newestLikes in response', findPost.extendedLikesInfo.newestLikes)
+                        console.log('newestLikes in Response', findPost.extendedLikesInfo.newestLikes)
                         res.status(200).json(findPost);
 
                         return;
