@@ -156,9 +156,9 @@ export class PostController {
                                         const user = await userService.getUserById(like.userId)
                                         if (user) {
                                             return {
-                                                addedAt: like.createdAt,
-                                                userId: like.userId,
-                                                login: user.login,
+                                                "addedAt": like.createdAt,
+                                                "userId": like.userId,
+                                                "login": user.login,
                                             }
                                         }
                                     }
@@ -167,11 +167,15 @@ export class PostController {
                             return result.filter((item: UpgradeLikes | undefined) => !!item);
                         }
 
-                        console.log('upgradeLikes get one post', await getUpgradeLikes(likes))
+                        const likesSS = await getUpgradeLikes(likes);
+                        const upgradeUpgradeLikes = likesSS.map((like) => {
+                            return {"addedAt": like?.addedAt,
+                                "userId": like?.userId,
+                                "login": like?.login,
+                            }
+                        })
+                        findPost.extendedLikesInfo.newestLikes = upgradeUpgradeLikes;
 
-                        findPost.extendedLikesInfo.newestLikes = await getUpgradeLikes(likes);
-
-                        console.log('newestLikes in Response', findPost.extendedLikesInfo.newestLikes)
                         res.status(200).json(findPost);
 
                         return;
@@ -245,7 +249,6 @@ export class PostController {
             const token = req.headers.authorization?.split(' ')[1]
             if (token) {
                 const newComment: IComment | undefined = await queryService.createCommentForThePost(postId, content, token)
-                console.log({newComment})
                 if (newComment) res.status(201).json(newComment)
             }
         } catch (error) {
@@ -321,7 +324,6 @@ export class PostController {
 
     static async sendLikeOrDislikeStatus(req: Request, res: Response) {
         try {
-            console.log('Request', req)
             const postService = new PostService();
             const queryService = new QueryService();
 
