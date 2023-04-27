@@ -55,15 +55,15 @@ router.delete('/comments/:id', authMiddleware, CommentController.deleteComment);
 router.get('/comments/:id', CommentController.getOneComment);
 
 /**Auth**/
-router.post('/auth/login', rateLimitGuard, AuthController.login);
+router.post('/auth/login', rateLimitGuard, AuthController.login);//rateLimitGuard
 router.post('/auth/logout', AuthController.logout);
-router.post('/auth/registration-confirmation', rateLimitGuard, codeConfirmed, isErrorMiddleware, AuthController.confirmEmail);
-router.post('/auth/registration', rateLimitGuard, userValidation, isErrorMiddleware, AuthController.registration);
-router.post('/auth/registration-email-resending', rateLimitGuard, emailExistValidation, isErrorMiddleware, AuthController.resendConfirm);
+router.post('/auth/registration-confirmation', rateLimitGuard, codeConfirmed, isErrorMiddleware, AuthController.confirmEmail);//rateLimitGuard
+router.post('/auth/registration', rateLimitGuard, userValidation, isErrorMiddleware, AuthController.registration);//rateLimitGuard
+router.post('/auth/registration-email-resending', rateLimitGuard, emailExistValidation, isErrorMiddleware, AuthController.resendConfirm);//rateLimitGuard
 router.get('/auth/me', authMiddleware, isErrorMiddleware, AuthController.me);
 router.post('/auth/refresh-token', AuthController.updatePairTokens);
-router.post('/auth/new-password', rateLimitGuard, recoveryCodeConfirmed, newPasswordValidation, isErrorMiddleware, AuthController.setupNewPassword);
-router.post('/auth/password-recovery', rateLimitGuard, emailValidationByNewPassword, isErrorMiddleware, AuthController.recoveryPassword);
+router.post('/auth/new-password', rateLimitGuard, recoveryCodeConfirmed, newPasswordValidation, isErrorMiddleware, AuthController.setupNewPassword);//rateLimitGuard
+router.post('/auth/password-recovery', rateLimitGuard, emailValidationByNewPassword, isErrorMiddleware, AuthController.recoveryPassword);//rateLimitGuard
 
 /**SecurityDevices**/
 router.get('/security/devices', SecurityController.getAllDevices);
@@ -71,4 +71,4 @@ router.delete('/security/devices', SecurityController.terminateDevicesSession);
 router.delete('/security/devices/:deviceId', SecurityController.terminateTheDeviceSession);
 
 /**Testing**/
-router.get('/testing/test', rateLimitGuard, SecurityController.testLimit);
+router.get('/testing/test', rateLimitGuard, SecurityController.testLimit);//rateLimitGuard
