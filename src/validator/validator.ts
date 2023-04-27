@@ -94,7 +94,6 @@ const isLikeStatusCheck: CustomValidator = (value: string) => {
     }
     throw new Error()
 }
-console.log('isLikeStatusCheck', isLikeStatusCheck)
 
 export const nameValidation = body('name')
     .trim()
