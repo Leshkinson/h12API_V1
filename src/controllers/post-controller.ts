@@ -138,7 +138,6 @@ export class PostController {
                         if (myStatus)
                             findPost.extendedLikesInfo.myStatus = myStatus;
                         const likes = await queryService.getLikes(id) as ILikeStatusWithoutId[];
-                        console.log('Likes', likes)
                         // const upgradeLikes = likes.map(async (like: ILikeStatusWithoutId): Promise<UpgradeLikes | undefined> => {
                         //     const user = await userService.getUserById(like.userId)
                         //     if (user) {
@@ -167,14 +166,9 @@ export class PostController {
                             return result.filter((item: UpgradeLikes | undefined) => !!item);
                         }
 
-                        const likesSS = await getUpgradeLikes(likes);
-                        const upgradeUpgradeLikes = likesSS.map((like) => {
-                            return {"addedAt": like?.addedAt,
-                                "userId": like?.userId,
-                                "login": like?.login,
-                            }
-                        })
-                        findPost.extendedLikesInfo.newestLikes = upgradeUpgradeLikes;
+                        findPost.extendedLikesInfo.newestLikes = await getUpgradeLikes(likes);
+                        console.log('findPost', findPost)
+                        console.log('findPost.extendedLikesInfo.newestLikes', findPost.extendedLikesInfo.newestLikes)
 
                         res.status(200).json(findPost);
 

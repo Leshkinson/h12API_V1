@@ -26,7 +26,15 @@ PostSchema.set('toJSON', {
         dto.id = dto._id;
         delete dto._id;
         delete dto.__v;
-        delete dto.updatedAt
+        delete dto.updatedAt;
+        // dto.newestLikes = dto.newestLikes.map((el: any) => {
+        //     delete el._id;
+        //     return el;
+        // })
+        dto.extendedLikesInfo.newestLikes = dto.extendedLikesInfo.newestLikes.map((el: any) => {
+            delete el._id;
+            return el;
+        })
     }
 })
 

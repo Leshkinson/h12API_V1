@@ -1,11 +1,9 @@
 import mongoose, {Schema} from "mongoose";
-import {ILikeStatus, ILikeStatusWithoutId} from "../ts/interfaces";
+import {ILikeStatusWithoutId} from "../ts/interfaces";
 
 export const LikeSchema = new Schema({
     likeStatus: {type: "string", required: true},
     userId: {type: mongoose.Types.ObjectId, ref: 'User'},
-    //userId: {type: "string", required: true},
-    //commentId: {type: mongoose.Types.ObjectId, ref: 'Comment'},
     commentOrPostId: {type: "string", required: true},
 }, {timestamps: true});
 
@@ -17,7 +15,5 @@ LikeSchema.set('toJSON', {
         delete dto.updatedAt;
     }
 });
-
-//LikeSchema.set('id', true);
-
-export const LikeModel = mongoose.model<ILikeStatusWithoutId>('LikeStatus', LikeSchema)
+LikeSchema.set('id', true);
+export const LikeModel = mongoose.model<ILikeStatusWithoutId>('LikeStatus', LikeSchema);

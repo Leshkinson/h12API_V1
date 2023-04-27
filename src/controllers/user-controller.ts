@@ -32,13 +32,9 @@ export class UserController {
 
     static async createUser(req: Request, res: Response) {
         try {
-            console.log('here1')
             const userService = new UserService();
-
             const {login, password, email} = req.body;
-            console.log('here 2', login, password, email)
             const newUser: IUser = await userService.create(login, password, email);
-            console.log('newUser', newUser)
 
             res.status(201).json(newUser);
         } catch (error) {

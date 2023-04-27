@@ -9,7 +9,16 @@ import {BlogsRepository} from "../repositories/blogs-repository";
 import {PostsRepository} from "../repositories/posts-repository";
 import {UsersRepository} from "../repositories/users-repository";
 import {CommentsRepository} from "../repositories/comments-repository";
-import {IBlog, IComment, ILikeStatus, ILikeStatusWithoutId, IPost, IUser, UpgradeLikes} from "../ts/interfaces";
+import {
+    IBlog,
+    IComment,
+    ILikeStatus,
+    ILikeStatusWithoutId,
+    IPost,
+    IUser,
+    UpgradeLikes,
+    UpgradeLikesWithoutLogin
+} from "../ts/interfaces";
 import {LikeRepository} from "../repositories/like-repository";
 import {UserService} from "./user-service";
 import {CommentService} from "./comment-service";
@@ -181,4 +190,5 @@ export class QueryService {
     public async testingDelete(): Promise<void> {
         await this.likeRepository.deleteAll();
     }
+
 }

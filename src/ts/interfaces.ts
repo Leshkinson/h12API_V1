@@ -81,3 +81,8 @@ export interface UpgradeLikes {
     userId: string,
     login: string,
 }
+
+export interface UpgradeLikesWithoutLogin {
+    addedAt: Date,
+    userId: string,
+}
