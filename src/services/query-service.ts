@@ -9,20 +9,13 @@ import {BlogsRepository} from "../repositories/blogs-repository";
 import {PostsRepository} from "../repositories/posts-repository";
 import {UsersRepository} from "../repositories/users-repository";
 import {CommentsRepository} from "../repositories/comments-repository";
-import {
-    IBlog,
-    IComment,
-    ILikeStatus,
-    ILikeStatusWithoutId,
-    IPost,
-    IUser,
-    UpgradeLikes,
-    UpgradeLikesWithoutLogin
-} from "../ts/interfaces";
+import {IBlog, IComment, ILikeStatus, ILikeStatusWithoutId, IPost, IUser, UpgradeLikes} from "../ts/interfaces";
 import {LikeRepository} from "../repositories/like-repository";
 import {UserService} from "./user-service";
 import {CommentService} from "./comment-service";
 import {PostService} from "./post-service";
+import {LikesStatus} from "../const/const";
+import {LikesStatusCfgValues} from "../ts/types";
 
 export class QueryService {
     private blogRepository: BlogsRepository;
@@ -147,9 +140,9 @@ export class QueryService {
         return await this.likeRepository.createLike(commentOrPostId, userId, likeStatus);
     }
 
-    public async changeLikeStatusForTheComment(likeId: string, likeStatus: string): Promise<ILikeStatus| ILikeStatusWithoutId | null> {
+    public async changeLikeStatusForTheComment(likeId: string, likeStatus: string): Promise<ILikeStatus | ILikeStatusWithoutId | null> {
         const like = await this.likeRepository.findLikeById(likeId);
-        if(like?.likeStatus !== likeStatus){
+        if (like?.likeStatus !== likeStatus) {
             return await this.likeRepository.updateLikeStatus(likeId, likeStatus)
         }
         return like
@@ -184,11 +177,86 @@ export class QueryService {
     }
 
     public async getLikes(id: string): Promise<ILikeStatus[] | ILikeStatusWithoutId[] | null> {
-        return  await this.likeRepository.findLikes(id)
+        return await this.likeRepository.findLikes(id)
     }
 
     public async testingDelete(): Promise<void> {
         await this.likeRepository.deleteAll();
     }
 
+    public async getUpgradeLikes(likes: ILikeStatusWithoutId[]): Promise<(UpgradeLikes | undefined)[]> {
+        const userService = new UserService();
+        const result: (UpgradeLikes | undefined)[] = await Promise.all(
+            likes.map(async (like: ILikeStatusWithoutId): Promise<UpgradeLikes | undefined> => {
+                    const user = await userService.getUserById(like.userId)
+                    if (user) {
+                        return {
+                            addedAt: like.createdAt,
+                            userId: like.userId,
+                            login: user.login,
+                        }
+                    }
+                }
+            ));
+
+        return result.filter((item: UpgradeLikes | undefined) => !!item);
+    }
+
+    public async getUpgradePosts(posts: IPost[] | IPost, token: string | undefined, postService: PostService): Promise<IPost[] | IPost | undefined> {
+        const userService = new UserService();
+        const tokenService = new TokenService();
+        if (token) {
+            const payload = await tokenService.getPayloadByAccessToken(token) as JWT;
+            const user = await userService.getUserById(payload.id);
+
+            return await this.upgraderPosts(posts, user, postService);
+        }
+
+        return await this.upgraderPosts(posts, null, postService);
+    }
+
+    public async upgraderPosts(posts: IPost[] | IPost, user: IUser | null, postService: PostService): Promise<IPost[] | IPost | undefined> {
+        if (Array.isArray(posts)) {
+            if (user) {
+                return await Promise.all(posts.map(async (post: IPost): Promise<IPost> => {
+                    post.extendedLikesInfo.likesCount = await this.getTotalCountLikeOrDislike(String(post._id), LikesStatus.LIKE, postService);
+                    post.extendedLikesInfo.dislikesCount = await this.getTotalCountLikeOrDislike(String(post._id), LikesStatus.DISLIKE, postService);
+                    const myStatus = await this.getLikeStatus(String(user._id), String(post._id)) as LikesStatusCfgValues;
+                    if (myStatus)
+                        post.extendedLikesInfo.myStatus = myStatus;
+                    const likes = await this.getLikes(String(post._id)) as ILikeStatusWithoutId[];
+                    post.extendedLikesInfo.newestLikes = await this.getUpgradeLikes(likes) as UpgradeLikes[];
+
+                    return post;
+                }))
+            }
+
+            return await Promise.all(posts.map(async (post: IPost): Promise<IPost> => {
+                const likes = await this.getLikes(String(post._id)) as ILikeStatusWithoutId[];
+                post.extendedLikesInfo.likesCount = await this.getTotalCountLikeOrDislike(String(post._id), LikesStatus.LIKE, postService);
+                post.extendedLikesInfo.dislikesCount = await this.getTotalCountLikeOrDislike(String(post._id), LikesStatus.DISLIKE, postService);
+                post.extendedLikesInfo.newestLikes = await this.getUpgradeLikes(likes) as UpgradeLikes[];
+
+                return post;
+            }))
+        }
+        if (user) {
+            posts.extendedLikesInfo.likesCount = await this.getTotalCountLikeOrDislike(String(posts._id), LikesStatus.LIKE, postService);
+            posts.extendedLikesInfo.dislikesCount = await this.getTotalCountLikeOrDislike(String(posts._id), LikesStatus.DISLIKE, postService);
+            const myStatus = await this.getLikeStatus(String(user._id), String(posts._id)) as LikesStatusCfgValues;
+            if (myStatus)
+                posts.extendedLikesInfo.myStatus = myStatus;
+            const likes = await this.getLikes(String(posts._id)) as ILikeStatusWithoutId[];
+            posts.extendedLikesInfo.newestLikes = await this.getUpgradeLikes(likes) as UpgradeLikes[];
+
+            return posts;
+        }
+
+        const likes = await this.getLikes(String(posts._id)) as ILikeStatusWithoutId[];
+        posts.extendedLikesInfo.likesCount = await this.getTotalCountLikeOrDislike(String(posts._id), LikesStatus.LIKE, postService);
+        posts.extendedLikesInfo.dislikesCount = await this.getTotalCountLikeOrDislike(String(posts._id), LikesStatus.DISLIKE, postService);
+        posts.extendedLikesInfo.newestLikes = await this.getUpgradeLikes(likes) as UpgradeLikes[];
+
+        return posts;
+    }
 }

@@ -1,12 +1,9 @@
 import {Request, Response} from "express";
-import {IBlog, ILikeStatusWithoutId, IPost, UpgradeLikes} from "../ts/interfaces";
+import {IBlog, IPost} from "../ts/interfaces";
 import {BlogService} from "../services/blog-service";
 import {QueryService} from "../services/query-service";
-import {BlogsRequest, BlogsRequestWithoutSNT, LikesStatusCfgValues} from "../ts/types";
-import {UserService} from "../services/user-service";
-import {JWT, TokenService} from "../application/token-service";
+import {BlogsRequest, BlogsRequestWithoutSNT} from "../ts/types";
 import {PostService} from "../services/post-service";
-import {LikesStatus} from "../const/const";
 
 export class BlogController {
     static async getAllBlogs(req: Request, res: Response) {
@@ -100,8 +97,7 @@ export class BlogController {
 
     static async getAllPostsForTheBlog(req: Request, res: Response) {
         try {
-            const userService = new UserService();
-            const tokenService = new TokenService();
+
             const queryService = new QueryService();
             const postService = new PostService();
 
@@ -114,67 +110,12 @@ export class BlogController {
             const posts: IPost[] = await queryService.getPostsForTheBlog(blogId, pageNumber, pageSize, sortBy, sortDirection);
             const totalCount: number = await queryService.getTotalCountPostsForTheBlog(blogId);
             if (posts) {
-                if (token) {
-                    const payload = await tokenService.getPayloadByAccessToken(token) as JWT;
-                    const user = await userService.getUserById(payload.id);
-                    if (user) {
-                        const upgradePosts = posts.map(async (post: IPost): Promise<IPost> => {
-                            post.extendedLikesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(String(post._id), LikesStatus.LIKE, postService);
-                            post.extendedLikesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(String(post._id), LikesStatus.DISLIKE, postService);
-                            const myStatus = await queryService.getLikeStatus(String(user._id), String(post._id)) as LikesStatusCfgValues;
-                            if (myStatus)
-                                post.extendedLikesInfo.myStatus = myStatus;
-                            const likes = await queryService.getLikes(String(post._id)) as ILikeStatusWithoutId[];
-                            const upgradeLikes = likes.map(async (like: ILikeStatusWithoutId): Promise<UpgradeLikes | undefined> => {
-                                const user = await userService.getUserById(like.userId)
-                                if (user) {
-                                    return {
-                                        addedAt: like.createdAt,
-                                        userId: like.userId,
-                                        login: user.login,
-                                    }
-                                }
-                            })
-                            post.extendedLikesInfo.newestLikes = await Promise.all(upgradeLikes) as UpgradeLikes[]
-                            return post
-                        })
-
-                        res.status(200).json({
-                            "pagesCount": Math.ceil(totalCount / pageSize),
-                            "page": pageNumber,
-                            "pageSize": pageSize,
-                            "totalCount": totalCount,
-                            "items": await Promise.all(upgradePosts)
-                        })
-
-                        return;
-                    }
-                }
-                const upgradePosts = posts.map(async (post: IPost): Promise<IPost> => {
-                    const likes = await queryService.getLikes(String(post._id)) as ILikeStatusWithoutId[];
-                    const upgradeLikes = likes.map(async (like: ILikeStatusWithoutId): Promise<UpgradeLikes | undefined> => {
-                        const user = await userService.getUserById(like.userId)
-                        if (user) {
-                            return {
-                                addedAt: like.createdAt,
-                                userId: like.userId,
-                                login: user.login,
-                            }
-                        }
-                    })
-
-                    post.extendedLikesInfo.likesCount = await queryService.getTotalCountLikeOrDislike(String(post._id), LikesStatus.LIKE, postService);
-                    post.extendedLikesInfo.dislikesCount = await queryService.getTotalCountLikeOrDislike(String(post._id), LikesStatus.DISLIKE, postService);
-                    post.extendedLikesInfo.newestLikes = await Promise.all(upgradeLikes) as UpgradeLikes[]
-                    return post
-                })
-                console.log('upgradePosts blog2', await Promise.all(upgradePosts))
                 res.status(200).json({
                     "pagesCount": Math.ceil(totalCount / pageSize),
                     "page": pageNumber,
                     "pageSize": pageSize,
                     "totalCount": totalCount,
-                    "items": await Promise.all(upgradePosts)
+                    "items": await queryService.getUpgradePosts(posts, token, postService)
                 })
             }
         } catch (error) {
