@@ -1,5 +1,5 @@
-import {IDevice} from "../ts/interfaces";
 import {Model} from "mongoose";
+import {IDevice} from "../ts/interfaces";
 import {DeviceModel} from "../models/device-session-model";
 
 export class DeviceRepository {
@@ -24,7 +24,7 @@ export class DeviceRepository {
     }
 
     public async findAll(userId: string): Promise<IDevice[] | null> {
-        return this.deviceModel.find({userId: userId})
+        return this.deviceModel.find({userId: userId});
     }
 
     public async deleteAllWithExcept(userId: string, deviceId: string): Promise<void> {

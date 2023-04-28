@@ -1,8 +1,7 @@
 import jwt, {JwtPayload} from "jsonwebtoken";
-import {QueryService} from "../services/query-service";
+import {UserService} from "../services/user-service";
 import {Request, Response, NextFunction} from "express";
 import {JWT, TokenService} from "../application/token-service";
-import {UserService} from "../services/user-service";
 
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
     if (!req.headers.authorization) {
@@ -42,5 +41,4 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
     }
 
     next()
-
 }

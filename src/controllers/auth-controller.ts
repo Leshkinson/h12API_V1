@@ -1,7 +1,6 @@
 import {IDevice} from "../ts/interfaces";
 import {Request, Response} from "express";
 import {UserService} from "../services/user-service";
-import {QueryService} from "../services/query-service";
 import {TokenMapper} from "../dto/mappers/token-mapper";
 import {SessionService} from "../services/session-service";
 import {JWT, TokenService} from "../application/token-service";
@@ -149,7 +148,7 @@ export class AuthController {
     static async resendConfirm(req: Request, res: Response) {
         try {
             const userService = new UserService();
-            const {email} = req.body
+            const {email} = req.body;
             await userService.resendConfirmByUser(email)
             res.sendStatus(204)
         } catch (error) {
@@ -163,7 +162,7 @@ export class AuthController {
     static async recoveryPassword(req: Request, res: Response) {
         try {
             const userService = new UserService();
-            const {email} = req.body
+            const {email} = req.body;
             await userService.requestByRecovery(email)
             res.sendStatus(204)
         } catch (error) {

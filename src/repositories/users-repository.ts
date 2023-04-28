@@ -23,29 +23,29 @@ export class UsersRepository {
     }
 
     public async findUserById(id: string | JwtPayload): Promise<IUser | null> {
-        return this.userModel.findById({_id: id})
+        return this.userModel.findById({_id: id});
     }
 
     public async findUserByParam(param: string): Promise<IUser | null> {
-        return this.userModel.findOne({$or:[{"login": param}, {"email": param}, {"code": param}]})
+        return this.userModel.findOne({$or:[{"login": param}, {"email": param}, {"code": param}]});
     }
 
     public async updateUserByConfirmed(id: string): Promise<IUser | null> {
         return this.userModel.findOneAndUpdate({_id: id}, {
             isConfirmed: true
-        })
+        });
     }
 
     public async updateUserByNewPassword(id: string, newHashPassword: string): Promise<IUser | null> {
         return this.userModel.findOneAndUpdate({_id: id}, {
             password: newHashPassword
-        })
+        });
     }
 
     public async updateUserByCode(id: string, code: string): Promise<IUser | null> {
         return this.userModel.findOneAndUpdate({_id: id}, {
             code: code
-        })
+        });
     }
 
     public async getUsersCount(searchLoginTerm: { login: { $regex: RegExp } } | {} = {}, searchEmailTerm: { email: { $regex: RegExp } } | {} = {}): Promise<number> {

@@ -29,8 +29,8 @@ export class CommentService {
     }
 
     public async delete(id: RefType): Promise<IComment> {
-        const deleteComment = await this.commentRepository.deleteComment(id)
-        if (deleteComment) return deleteComment
+        const deleteComment = await this.commentRepository.deleteComment(id);
+        if (deleteComment) return deleteComment;
         throw new Error();
     }
 

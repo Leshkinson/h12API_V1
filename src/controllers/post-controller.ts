@@ -63,7 +63,7 @@ export class PostController {
             const token = req.headers.authorization?.split(' ')[1];
             const findPost: IPost | undefined = await postService.getOne(id);
             if (findPost) {
-                const newFindPost = await queryService.getUpgradePosts(findPost, token, postService)
+                const newFindPost = await queryService.getUpgradePosts(findPost, token, postService);
 
                 res.status(200).json(newFindPost);
             }
@@ -114,7 +114,7 @@ export class PostController {
 
             const {postId} = req.params;
             const {content} = req.body;
-            const token = req.headers.authorization?.split(' ')[1]
+            const token = req.headers.authorization?.split(' ')[1];
             if (token) {
                 const newComment: IComment | undefined = await queryService.createCommentForThePost(postId, content, token)
                 if (newComment) res.status(201).json(newComment)

@@ -8,7 +8,7 @@ export const UserSchema = new Schema({
     isConfirmed: {type: "boolean", required: false},
     code: {type: "string", required: false},
     expirationDate: {type: "Date", required: false}
-}, {timestamps: true})
+}, {timestamps: true});
 
 UserSchema.set('toJSON', {
     transform: function (doc, dto) {

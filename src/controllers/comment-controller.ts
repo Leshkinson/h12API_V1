@@ -62,24 +62,28 @@ export class CommentController {
                 const user = await userService.getUserById(payload.id);
 
                 if (!user) {
-                    res.sendStatus(404)
-                    return
+                    res.sendStatus(404);
+
+                    return;
                 }
 
                 const comment: IComment | undefined = await commentService.getOne(id);
 
                 if (!comment) {
-                    res.sendStatus(404)
-                    return
+                    res.sendStatus(404);
+
+                    return;
                 }
                 if (comment?.commentatorInfo.userLogin !== user?.login) {
-                    res.sendStatus(403)
-                    return
+                    res.sendStatus(403);
+
+                    return;
                 }
 
                 if (comment?.commentatorInfo.userId !== user?._id.toString()) {
-                    res.sendStatus(403)
-                    return
+                    res.sendStatus(403);
+
+                    return;
                 }
 
                 await commentService.delete(id);
@@ -133,8 +137,6 @@ export class CommentController {
 
     static async sendLikeOrDislikeStatus(req: Request, res: Response) {
         try {
-            //const userService = new UserService();
-            //const tokenService = new TokenService();
             const commentService = new CommentService();
             const queryService = new QueryService();
 
@@ -143,15 +145,7 @@ export class CommentController {
             const token = req.headers.authorization?.split(' ')[1];
             if (token) {
                 await queryService.setUpLikeOrDislikeStatus(token, commentId, likeStatus, commentService)
-                // const payload = await tokenService.getPayloadByAccessToken(token) as JWT;
-                // const user = await userService.getUserById(payload.id);
-                // const comment: IComment | undefined = await commentService.getOne(commentId);
-                // if (!user || !comment) {
-                //     res.sendStatus(404);
-                //
-                //     return;
-                // }
-                // await queryService.makeLikeStatusForTheComment(likeStatus, commentId, String(user._id));
+
                 res.sendStatus(204);
             }
         } catch (error) {

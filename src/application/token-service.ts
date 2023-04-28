@@ -1,6 +1,5 @@
-
-import jwt, {JwtPayload, Secret, SignOptions} from "jsonwebtoken";
 import {SessionService} from "../services/session-service";
+import jwt, {JwtPayload, Secret, SignOptions} from "jsonwebtoken";
 
 const settings = {
     JWT_ACCESS_SECRET: "superpupersecret",
@@ -38,27 +37,27 @@ export class TokenService {
     }
 
     public getPayloadByAccessToken(token: string): string | JwtPayload | JWT | boolean {
-        const {exp} = jwt.decode(token) as JwtPayload
-        if (!exp) return false
+        const {exp} = jwt.decode(token) as JwtPayload;
+        if (!exp) return false;
         if (Date.now() >= exp * 1000) {
-            return false
+            return false;
         }
 
-        return jwt.verify(token, settings.JWT_ACCESS_SECRET)
+        return jwt.verify(token, settings.JWT_ACCESS_SECRET);
 
     }
 
     public getPayloadByRefreshToken(token: string): string | JwtPayload | JWT | boolean {
-        const {exp} = jwt.decode(token) as JwtPayload
-        if (!exp) return false
+        const {exp} = jwt.decode(token) as JwtPayload;
+        if (!exp) return false;
         if (Date.now() >= exp * 1000) {
-            return false
+            return false;
         }
         return jwt.verify(token, settings.JWT_REFRESH_SECRET)
     }
 
     public async checkTokenByBlackList(token: string): Promise<boolean> {
-        const {iat, deviceId} = jwt.decode(token) as JwtPayload
+        const {iat, deviceId} = jwt.decode(token) as JwtPayload;
         const sessionService = new SessionService();
         const session = await sessionService.findSession(deviceId);
         return iat === session?.lastActiveDate;
@@ -70,8 +69,8 @@ export class TokenService {
         if (isBlockedToken) throw new Error;
         const payload = await this.getPayloadByRefreshToken(refreshToken) as JWT;
         if (!payload)
-            throw new Error
+            throw new Error;
 
-        return payload
+        return payload;
     }
 }

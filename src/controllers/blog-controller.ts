@@ -1,9 +1,9 @@
 import {Request, Response} from "express";
 import {IBlog, IPost} from "../ts/interfaces";
 import {BlogService} from "../services/blog-service";
+import {PostService} from "../services/post-service";
 import {QueryService} from "../services/query-service";
 import {BlogsRequest, BlogsRequestWithoutSNT} from "../ts/types";
-import {PostService} from "../services/post-service";
 
 export class BlogController {
     static async getAllBlogs(req: Request, res: Response) {

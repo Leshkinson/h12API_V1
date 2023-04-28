@@ -2,8 +2,8 @@ import {Request, Response} from "express";
 import {BlogService} from "../services/blog-service";
 import {PostService} from "../services/post-service";
 import {UserService} from "../services/user-service";
-import {CommentService} from "../services/comment-service";
 import {QueryService} from "../services/query-service";
+import {CommentService} from "../services/comment-service";
 
 export class TestController {
     static async testing(req: Request, res: Response): Promise<void> {

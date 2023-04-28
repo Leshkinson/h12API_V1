@@ -33,7 +33,7 @@ export class PostsRepository {
             shortDescription,
             content,
             blogId
-        })
+        });
     }
 
     public async deletePost(id: RefType) {

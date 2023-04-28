@@ -1,11 +1,11 @@
 import bcrypt from "bcrypt";
 import {v4 as uuidv4} from "uuid";
 import {IUser} from "../ts/interfaces";
+import {JwtPayload} from "jsonwebtoken";
 import {RefType, SortOrder} from "mongoose";
 import {MailService} from "../application/mail-service";
 import {UsersRepository} from "../repositories/users-repository";
 import {passwordConfirmedTemplate, userInvitationTemplate} from "../templates/mail-templates/user-invitation";
-import {JwtPayload} from "jsonwebtoken";
 
 export class UserService {
     private userRepository: UsersRepository;
@@ -33,15 +33,15 @@ export class UserService {
     public async create(login: string, password: string, email: string): Promise<IUser> {
         const hashPassword = await bcrypt.hash(password, 5);
 
-        return await this.userRepository.createUser(login, hashPassword, email)
+        return await this.userRepository.createUser(login, hashPassword, email);
     }
 
     public async getUserByParam(param: string): Promise<IUser | null> {
-        return await this.userRepository.findUserByParam(param)
+        return await this.userRepository.findUserByParam(param);
     }
 
     public async getUserById(id:string | JwtPayload): Promise<IUser | null> {
-        return await this.userRepository.findUserById(id)
+        return await this.userRepository.findUserById(id);
     }
 
     public async createByRegistration(login: string, password: string, email: string): Promise<IUser | null> {
@@ -55,11 +55,11 @@ export class UserService {
             if (error instanceof Error) {
                 await this.userRepository.deleteUser((user._id).toString())
                 console.log(error.message);
-                return null
+                return null;
             }
         }
 
-        return user
+        return user;
     }
 
     public async confirmUser(code: string): Promise<boolean | null| IUser> {
@@ -92,11 +92,11 @@ export class UserService {
 
     public async requestByRecovery (email: string) {
         const mailService = new MailService()
-        const user = await this.getUserByParam(email)
+        const user = await this.getUserByParam(email);
         if(user && user.isConfirmed) {
             const recoveryCode = uuidv4();
             await this.userRepository.updateUserByCode((user._id).toString(), recoveryCode);
-            await mailService.sendConfirmMessage(email, recoveryCode, passwordConfirmedTemplate)
+            await mailService.sendConfirmMessage(email, recoveryCode, passwordConfirmedTemplate);
         }
     }
 

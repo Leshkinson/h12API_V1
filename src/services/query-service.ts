@@ -205,13 +205,13 @@ export class QueryService {
             const payload = await tokenService.getPayloadByAccessToken(token) as JWT;
             const user = await userService.getUserById(payload.id);
 
-            return await this.upgraderPosts(posts, user, postService);
+            return await this.changerPosts(posts, user, postService);
         }
 
-        return await this.upgraderPosts(posts, null, postService);
+        return await this.changerPosts(posts, null, postService);
     }
 
-    public async upgraderPosts(entityPost: IPost[] | IPost, user: IUser | null, postService: PostService): Promise<IPost[] | IPost | undefined> {
+    public async changerPosts(entityPost: IPost[] | IPost, user: IUser | null, postService: PostService): Promise<IPost[] | IPost | undefined> {
         if (Array.isArray(entityPost)) {
             if (user) {
                 return await Promise.all(entityPost.map(async (post: IPost): Promise<IPost> => {
@@ -233,7 +233,7 @@ export class QueryService {
         return await this.postMapper(null, entityPost, postService);
     }
 
-    public async postMapper(myStatus: LikesStatusCfgValues | null, post: IPost, postService: PostService) {
+    public async postMapper(myStatus: LikesStatusCfgValues | null, post: IPost, postService: PostService): Promise<IPost> {
         if (myStatus) {
             post.extendedLikesInfo.myStatus = myStatus;
         }

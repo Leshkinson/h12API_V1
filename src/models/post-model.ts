@@ -1,5 +1,5 @@
-import {IPost, UpgradeLikes} from "../ts/interfaces";
 import mongoose, {Schema} from "mongoose";
+import {IPost, UpgradeLikes} from "../ts/interfaces";
 
 export const PostSchema = new Schema({
     title: {type: "string", required: true},

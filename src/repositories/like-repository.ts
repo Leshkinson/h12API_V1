@@ -1,6 +1,6 @@
 import {Model, RefType} from "mongoose";
-import {ILikeStatus, ILikeStatusWithoutId} from "../ts/interfaces";
 import {LikeModel} from "../models/like-model";
+import {ILikeStatus, ILikeStatusWithoutId} from "../ts/interfaces";
 
 export class LikeRepository {
     private likeModel: Model<ILikeStatus | ILikeStatusWithoutId>;

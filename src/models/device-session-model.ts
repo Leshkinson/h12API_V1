@@ -7,7 +7,7 @@ export const DeviceSchema = new Schema({
     lastActiveDate: {type: "string", required: true},
     deviceId: {type: "string", required: true},
     userId: {type: "string", required: true},
-}, {timestamps: true})
+}, {timestamps: true});
 
 DeviceSchema.set('toJSON', {
     transform: function (doc, dto) {

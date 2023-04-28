@@ -36,6 +36,7 @@ export class SecurityController {
             const payload = await tokenService.getPayloadFromToken(refreshToken);
             if (!payload) {
                 res.sendStatus(403);
+
                 return;
             }
             const user = await userService.getUserByParam(payload.email);
@@ -61,16 +62,19 @@ export class SecurityController {
             const {refreshToken} = req.cookies;
             if (!refreshToken) {
                 res.sendStatus(401);
+
                 return;
             }
             const isBlockedToken = await tokenService.checkTokenByBlackList(refreshToken);
             if (isBlockedToken) {
                 res.sendStatus(401);
+
                 return;
             }
             const payload = await tokenService.getPayloadByRefreshToken(refreshToken) as JWT;
             if (!payload) {
                 res.sendStatus(403);
+
                 return;
             }
             const user = await userService.getUserByParam(payload.email);
@@ -79,9 +83,10 @@ export class SecurityController {
             if (!session) throw new Error;
             if (session.userId !== (String(user._id))) {
                 res.sendStatus(403)
-                return
+
+                return;
             }
-            await sessionService.deleteTheSession(String(user._id), deviceId)
+            await sessionService.deleteTheSession(String(user._id), deviceId);
             res.sendStatus(204)
         } catch (error) {
             if (error instanceof Error) {
