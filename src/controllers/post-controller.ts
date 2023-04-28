@@ -1,12 +1,12 @@
 import {Request, Response} from "express";
 import {LikesStatus} from "../const/const";
+import {IComment, IPost} from "../ts/interfaces";
 import {PostService} from "../services/post-service";
 import {UserService} from "../services/user-service";
 import {QueryService} from "../services/query-service";
-import {IComment, IPost} from "../ts/interfaces";
+import {CommentService} from "../services/comment-service";
 import {JWT, TokenService} from "../application/token-service";
 import {CommentsRequest, LikesStatusCfgValues, PostsRequest} from "../ts/types";
-import {CommentService} from "../services/comment-service";
 
 export class PostController {
     static async getAllPosts(req: Request, res: Response) {

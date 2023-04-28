@@ -1,21 +1,20 @@
-//import {JwtPayload} from "jsonwebtoken";
+import {UserService} from "./user-service";
+import {PostService} from "./post-service";
+import {LikesStatus} from "../const/const";
 import {BlogModel} from "../models/blog-model";
 import {PostModel} from "../models/post-model";
 import {UserModel} from "../models/user-model";
+import {CommentService} from "./comment-service";
+import {LikesStatusCfgValues} from "../ts/types";
 import {CommentModel} from "../models/comment-model";
 import mongoose, {Model, RefType, SortOrder} from "mongoose";
 import {JWT, TokenService} from "../application/token-service";
+import {LikeRepository} from "../repositories/like-repository";
 import {BlogsRepository} from "../repositories/blogs-repository";
 import {PostsRepository} from "../repositories/posts-repository";
 import {UsersRepository} from "../repositories/users-repository";
 import {CommentsRepository} from "../repositories/comments-repository";
 import {IBlog, IComment, ILikeStatus, ILikeStatusWithoutId, IPost, IUser, UpgradeLikes} from "../ts/interfaces";
-import {LikeRepository} from "../repositories/like-repository";
-import {UserService} from "./user-service";
-import {CommentService} from "./comment-service";
-import {PostService} from "./post-service";
-import {LikesStatus} from "../const/const";
-import {LikesStatusCfgValues} from "../ts/types";
 
 export class QueryService {
     private blogRepository: BlogsRepository;
@@ -145,7 +144,8 @@ export class QueryService {
         if (like?.likeStatus !== likeStatus) {
             return await this.likeRepository.updateLikeStatus(likeId, likeStatus)
         }
-        return like
+
+        return like;
     }
 
     public async getTotalCountLikeOrDislike(id: string, param: string, service: CommentService | PostService) {
@@ -154,13 +154,13 @@ export class QueryService {
             return await this.likeRepository.countingLikeOrDislike(String(commentOrPost._id), param)
         }
 
-        throw new Error()
+        throw new Error();
     }
 
     public async getLikeStatus(userId: string, commentId: string) {
         const like = await this.likeRepository.findLike(userId, commentId);
         if (like)
-            return like.likeStatus
+            return like.likeStatus;
     }
 
     public async setUpLikeOrDislikeStatus(token: string, commentOrPostId: string, likeStatus: string, service: CommentService | PostService): Promise<ILikeStatus | ILikeStatusWithoutId | null> {
@@ -178,10 +178,6 @@ export class QueryService {
 
     public async getLikes(id: string): Promise<ILikeStatus[] | ILikeStatusWithoutId[] | null> {
         return await this.likeRepository.findLikes(id)
-    }
-
-    public async testingDelete(): Promise<void> {
-        await this.likeRepository.deleteAll();
     }
 
     public async getUpgradeLikes(likes: ILikeStatusWithoutId[]): Promise<(UpgradeLikes | undefined)[]> {
@@ -215,48 +211,41 @@ export class QueryService {
         return await this.upgraderPosts(posts, null, postService);
     }
 
-    public async upgraderPosts(posts: IPost[] | IPost, user: IUser | null, postService: PostService): Promise<IPost[] | IPost | undefined> {
-        if (Array.isArray(posts)) {
+    public async upgraderPosts(entityPost: IPost[] | IPost, user: IUser | null, postService: PostService): Promise<IPost[] | IPost | undefined> {
+        if (Array.isArray(entityPost)) {
             if (user) {
-                return await Promise.all(posts.map(async (post: IPost): Promise<IPost> => {
-                    post.extendedLikesInfo.likesCount = await this.getTotalCountLikeOrDislike(String(post._id), LikesStatus.LIKE, postService);
-                    post.extendedLikesInfo.dislikesCount = await this.getTotalCountLikeOrDislike(String(post._id), LikesStatus.DISLIKE, postService);
+                return await Promise.all(entityPost.map(async (post: IPost): Promise<IPost> => {
                     const myStatus = await this.getLikeStatus(String(user._id), String(post._id)) as LikesStatusCfgValues;
-                    if (myStatus)
-                        post.extendedLikesInfo.myStatus = myStatus;
-                    const likes = await this.getLikes(String(post._id)) as ILikeStatusWithoutId[];
-                    post.extendedLikesInfo.newestLikes = await this.getUpgradeLikes(likes) as UpgradeLikes[];
-
-                    return post;
+                    return await this.postMapper(myStatus, post, postService)
                 }))
             }
 
-            return await Promise.all(posts.map(async (post: IPost): Promise<IPost> => {
-                const likes = await this.getLikes(String(post._id)) as ILikeStatusWithoutId[];
-                post.extendedLikesInfo.likesCount = await this.getTotalCountLikeOrDislike(String(post._id), LikesStatus.LIKE, postService);
-                post.extendedLikesInfo.dislikesCount = await this.getTotalCountLikeOrDislike(String(post._id), LikesStatus.DISLIKE, postService);
-                post.extendedLikesInfo.newestLikes = await this.getUpgradeLikes(likes) as UpgradeLikes[];
-
-                return post;
+            return await Promise.all(entityPost.map(async (post: IPost): Promise<IPost> => {
+                return await this.postMapper(null, post, postService)
             }))
         }
         if (user) {
-            posts.extendedLikesInfo.likesCount = await this.getTotalCountLikeOrDislike(String(posts._id), LikesStatus.LIKE, postService);
-            posts.extendedLikesInfo.dislikesCount = await this.getTotalCountLikeOrDislike(String(posts._id), LikesStatus.DISLIKE, postService);
-            const myStatus = await this.getLikeStatus(String(user._id), String(posts._id)) as LikesStatusCfgValues;
-            if (myStatus)
-                posts.extendedLikesInfo.myStatus = myStatus;
-            const likes = await this.getLikes(String(posts._id)) as ILikeStatusWithoutId[];
-            posts.extendedLikesInfo.newestLikes = await this.getUpgradeLikes(likes) as UpgradeLikes[];
+            const myStatus = await this.getLikeStatus(String(user._id), String(entityPost._id)) as LikesStatusCfgValues;
 
-            return posts;
+            return await this.postMapper(myStatus, entityPost, postService);
         }
 
-        const likes = await this.getLikes(String(posts._id)) as ILikeStatusWithoutId[];
-        posts.extendedLikesInfo.likesCount = await this.getTotalCountLikeOrDislike(String(posts._id), LikesStatus.LIKE, postService);
-        posts.extendedLikesInfo.dislikesCount = await this.getTotalCountLikeOrDislike(String(posts._id), LikesStatus.DISLIKE, postService);
-        posts.extendedLikesInfo.newestLikes = await this.getUpgradeLikes(likes) as UpgradeLikes[];
+        return await this.postMapper(null, entityPost, postService);
+    }
 
-        return posts;
+    public async postMapper(myStatus: LikesStatusCfgValues | null, post: IPost, postService: PostService) {
+        if (myStatus) {
+            post.extendedLikesInfo.myStatus = myStatus;
+        }
+        const likes = await this.getLikes(String(post._id)) as ILikeStatusWithoutId[];
+        post.extendedLikesInfo.likesCount = await this.getTotalCountLikeOrDislike(String(post._id), LikesStatus.LIKE, postService);
+        post.extendedLikesInfo.dislikesCount = await this.getTotalCountLikeOrDislike(String(post._id), LikesStatus.DISLIKE, postService);
+        post.extendedLikesInfo.newestLikes = await this.getUpgradeLikes(likes) as UpgradeLikes[];
+
+        return post;
+    }
+
+    public async testingDelete(): Promise<void> {
+        await this.likeRepository.deleteAll();
     }
 }
