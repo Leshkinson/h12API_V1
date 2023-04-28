@@ -5,6 +5,7 @@ let count = 1;
 const myCache = new NodeCache();
 
 export const rateLimitGuard = async (req: Request, res: Response, next: NextFunction) => {
+    console.log(myCache.getStats())
     const url = req.url
     const tracker = req.ip;
     const prefixAgent = req.headers['user-agent'] ? req.headers['user-agent'] : 'unKnown';
@@ -15,14 +16,14 @@ export const rateLimitGuard = async (req: Request, res: Response, next: NextFunc
 
     if (myCache.has(`${key}`)) {
         const foo = myCache.get(`${key}`)
-        if(Number(foo) > 4) {
+        if(Number(foo) > 9) {
             res.sendStatus(429)
 
             return;
         }
         count = Number(foo) + 1;
     }
-    myCache.set(`${key}`, count, 10);
+    myCache.set(`${key}`, count, 14);
     count = 1;
     next()
 }

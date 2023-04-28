@@ -1,4 +1,4 @@
-import {IPost} from "../ts/interfaces";
+import {IPost, UpgradeLikes} from "../ts/interfaces";
 import mongoose, {Schema} from "mongoose";
 
 export const PostSchema = new Schema({
@@ -27,9 +27,9 @@ PostSchema.set('toJSON', {
         delete dto._id;
         delete dto.__v;
         delete dto.updatedAt;
-        dto.extendedLikesInfo.newestLikes = dto.extendedLikesInfo.newestLikes.map((el: any) => {
-            delete el._id;
-            return el;
+        dto.extendedLikesInfo.newestLikes = dto.extendedLikesInfo.newestLikes.map((like: any): UpgradeLikes => {
+            delete like._id;
+            return like;
         })
     }
 })
