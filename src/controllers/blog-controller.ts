@@ -138,7 +138,7 @@ export class BlogController {
                             post.extendedLikesInfo.newestLikes = await Promise.all(upgradeLikes) as UpgradeLikes[]
                             return post
                         })
-                        console.log('upgradePosts blog1',await Promise.all(upgradePosts))
+
                         res.status(200).json({
                             "pagesCount": Math.ceil(totalCount / pageSize),
                             "page": pageNumber,
@@ -146,6 +146,8 @@ export class BlogController {
                             "totalCount": totalCount,
                             "items": await Promise.all(upgradePosts)
                         })
+
+                        return;
                     }
                 }
                 const upgradePosts = posts.map(async (post: IPost): Promise<IPost> => {
